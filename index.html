@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" /> 
+<title>afe</title>
+<script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script>
+<script src="afecomponents.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js" integrity="sha512-GoORoNnxst42zE3rYPj4bNBm0Q6ZRXKNH2D9nEmNvVF/z24ywVnijAWVi/09iBiVDQVf3UlZHpzhAJIdd9BXqw==" crossorigin="anonymous"></script>
+
+<script >
+function $(o) {return document.getElementById(o)}
+const POXE ={} 
+const POXA = {
+registerComponent:function(name,f) {
+	if(AFRAME.components[name]) delete AFRAME.components[name]
+	AFRAME.registerComponent(name,f) 
+}
+}
+const query = location.search.substr(1).split("&")
+onload=function() {
+	editor()
+	POXE.load() 
+}
+
+function editor() {
+	window.onerror = function(msg, url, line, col, error) {  
+	    console.log(`${msg} lines:${line}-${col}`); 
+	};
+	POXE.ace() ;		//editor init	
+	$("b_apply").addEventListener("click", ()=>{
+		POXE.reload() ;
+	})
+	$("b_save").addEventListener("click", ()=>{
+		POXE.fsave()
+	})
+	$("editor").addEventListener("change", (ev)=>{
+		if(ev.target.checked) {
+			$("editp").style.display = "none" ;
+			$("viewp").style.width = "100%" ;
+		} else {
+			$("editp").style.display = "flex" ;
+			$("viewp").style.width = "50%" ;
+		}
+	})
+
+	addvcursor()
+}
+function addvcursor() {
+	let d = document.createElement("div") 
+	d.innerHTML = "I"
+	d.style.position = "absolute" 
+	d.style.pointerEvents = "none"
+	d.style.color = "#a22"
+	d.style.textShadow = "1px 0 1px #eee" 
+	document.body.appendChild(d)
+	document.body.addEventListener("mousemove", (ev)=>{
+				d.style.top = `calc( ${ev.pageY}px - 0.7rem)` ;
+				d.style.left = ev.pageX + "px" ;				
+	})	
+}
+
+POXE.fsave = function() {
+	const data = {
+		version:1.0,
+		settings:JSON.parse(POXE.e1.getValue()),
+		scenes:[POXE.e2.getValue()],
+		components:POXE.e3.getValue()
+	}
+
+	const f = data.settings.name
+	const oData = new FormData()
+	oData.append("fname", f)
+	oData.append("data",JSON.stringify(data))
+	var oReq = new XMLHttpRequest()
+	oReq.open("POST", "save/save.php", true)
+	oReq.responseType = "json" ;
+	oReq.onload = function(oEvent) {
+		if (oReq.status == 200) {
+			if(oReq.response && oReq.response.status==0) {
+				$("m_save").innerHTML = "saved"
+				if(POXE.loadfile!=f) {
+					location.href = `?save/data/${f}.json`
+				}
+			}
+		} else {
+			alert("save error")
+		}
+	};
+	$("m_save").innerHTML = "" 
+	oReq.send(oData)
+}
+POXE.load = ()=> {
+	const data = JSON.parse(localStorage.getItem("afe.polygon.work"))[0]
+	if(data) {
+		const sc = data.scenes[0]
+		const st = data.settings
+		$('title').innerHTML = st.name 
+		POXE.e2.setValue(sc,-1)
+		POXE.e3.setValue(data.components,-1)
+		POXE.e1.setValue(JSON.stringify(data.settings),-1)
+		POXE.reload() 
+	}
+}
+POXE.save = (data)=> {
+	data.version = "1.0" ;
+	var d = JSON.stringify([data]) ;
+	localStorage.setItem("afe.polygon.work",d)
+}
+
+POXE.reload = ()=> {
+	console.log("reload") ;
+
+	const data = {
+		settings:JSON.parse(POXE.e1.getValue()),
+		scenes:[POXE.e2.getValue()],
+		components:POXE.e3.getValue()
+	}
+	const osc = document.querySelector("a-scene")
+	if(osc) $("scene").removeChild(osc)
+	try {
+		eval(data.components)
+	} catch(err) {
+		console.log("cached")
+		console.log(err)
+	}
+	const sc = document.createElement("a-scene")
+	sc.setAttribute('background','color',"#88f")
+	sc.setAttribute("embedded",true)
+	sc.innerHTML = data.scenes[0]
+	$("scene").appendChild(sc)
+
+	POXE.save(data) 
+}
+
+POXE.ace = ()=> {
+	ace.config.set('basePath', "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/") 
+	var fontsize = (document.body.offsetWidth<1000)?12:14 ;
+	var theme = "ace/theme/tomorrow_night" ;
+	var keybind = {
+	    name: 'save',
+	    bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
+	    exec: (editor)=> {
+	        POXE.reload() ;
+	    },
+	}
+		var keybind2 = {
+	    name: 'up',
+	    bindKey: {win: 'Ctrl-P',  mac: 'Ctrl-P'},
+	    exec: (editor)=> {
+	        editor.navigateUp(1) ;
+	    },
+	}
+
+	function setace(name,type) {
+		const e = ace.edit(name) ;
+		e.getSession().setMode(type);
+		e.setFontSize(fontsize);
+		e.setTheme(theme);
+		e.getSession().setTabSize(2);
+		e.getSession().setUseWrapMode(true);
+		e.getSession().setUseSoftTabs(false) ;
+		e.commands.addCommand(keybind);
+		e.commands.addCommand(keybind2);	
+		return e
+	}
+	POXE.e1 = setace("e1","ace/mode/json")
+	POXE.e2 = setace("e2","ace/mode/html")
+	POXE.e3 = setace("e3","ace/mode/typescript") ;
+}
+
+</script>
+<style>
+body,html {
+	margin:0 ;
+	width:100% ;
+	height:100% ;
+	font-size:12px ;
+}
+
+body {
+	display:flex ;
+	box-sizing: border-box ;
+	font-family:sans-serif ;
+}
+button {
+	font-size:0.8rem 
+}
+div.edit {
+	display:flex ;
+	flex-direction: column;
+	width:calc(60% - 5px) ;
+	height:100% ;
+	background-color:#222 ;
+}
+div.view {
+	position:relative ;
+	display:flex ;
+	flex-direction: column;
+	width:50%;
+	height:100% ;
+	overflow:hidden ;
+}
+div.sep {
+	width:5px ;
+	display:none ;
+	border:2px solid black ;
+	background-color:silver ;
+	cursor:col-resize ;
+}
+@media (max-aspect-ratio: 5/4 ) {
+	body {
+			flex-direction: column;
+	}
+	div.edit {
+		height:calc(60% - 5px) ;
+		width:100% ;
+		order:2 ;
+	}
+	div.view {
+		height:50%;
+		width:100% ;
+		order:1 ;
+	}
+}
+div.view canvas {
+	width:100% ;
+	height:100% ;
+}
+div.edit textarea {
+	font-size:1rem ;
+	font-family:monospace ;
+	height:33% ;
+	tab-size:4 ;
+	-webkit-overflow-scrolling : touch ;
+}
+
+#ebox {
+	height:calc(100% - 6rem) ;
+}
+#cc {
+	position:absolute ;
+	top:0;
+	left:0;
+	color:#eee ;
+	background-color:#222 ;
+	opacity:0.6 ;
+	vertical-align:baseline;
+}
+#scene {
+	width:100%;
+	height:100% ;
+}
+#pui div.b{
+	display:flex ;
+}
+#pui input {
+	font-size:0.8rem ;
+}
+#pui div.t {
+	width:4rem ;
+	padding-left:0.2rem ;
+	overflow:hidden ;
+}
+#pui div.v {
+	width:4rem ;
+	padding-left:0.5rem ;
+	overflow:hidden ;
+}
+#ec {
+	height:2rem ;
+	color:#eee ;
+}
+#ec a {
+	color:#eee ;	
+}
+
+#msg {
+	height:4rem ;
+	background-color:#444 ;
+	color:#eee ;
+	overflow-y:scroll ;
+}
+#msgc {
+	padding-left:1rem ;
+	line-height:100% ;
+}
+
+#loading {
+	position:absolute ;
+	top:0;
+	left:0;
+	width:100% ;
+	height:100% ;	
+	pointer-events: none ;
+	display:none;
+}
+#loading img {
+	margin-top:calc(50vh - 33px) ;
+	margin-left:calc(25vw  - 33px);
+}
+label,button {
+	cursor:pointer ;	
+}
+.tabs {
+    position: relative;
+    height:100% ;
+    padding: 0;
+    margin:0 ;
+}
+.tabs li {
+    list-style: none;
+    display: inline-block;
+}
+.tabs input[type=radio] {
+    display: none;
+}
+.tabs label {
+    display: block;
+    cursor: pointer;
+    font-size:0.8rem ;
+    font-weight:bold ;
+    height:1rem ;
+    padding: 3px;
+    background-color: #222;
+    color: #fff;
+}
+.tabs label:hover {
+    background-color: #cccccc;
+    color: #000000;
+}
+.tabs input[type=radio]:checked + label {
+    background-color: #eee;
+    color: #000000;
+}
+.tabs .contents {
+    display: none;
+    position: absolute;
+    width:100% ;
+    height:calc(100% - 1.5rem) ;
+    top:1.5rem ;
+    left: 0;
+    overflow-y:hidden ;
+}
+.tabs input[type=radio]:checked + label + .contents{
+    display: block;
+}
+/* swicth (single checkbox) */
+.oswitch input {
+	display:none ;
+}
+.oswitch .sbtn {
+	font-family:"apple color emoji",sans-serif;
+}
+.oswitch input[id=pause] + .sbtn:before {
+	content: "P" ;
+}
+.oswitch input[id=pause]:checked + .sbtn:before {
+	content: ">" ;
+}
+.oswitch input[id=editor] + .sbtn:before {
+	content: "<" ;
+}
+.oswitch input[id=editor]:checked + .sbtn:before {
+	content: ">" ;
+}
+
+#footer {
+	position:absolute ;
+	top:calc(100% - 2rem) ;
+	color:#888 ;
+}
+
+#cursor {
+	position:absolute ;
+	pointer-events: none ;
+}
+#log textarea{
+	width:100% ;
+	height:calc(100% - 2px);
+	border:0;
+	background-color:black ;
+	color:white;
+	font-size:12px;
+}
+</style>
+<body>
+<div class=edit id=editp>
+<div id=ec>
+<span id=title></span>
+<button id=b_save style="margin-left:10rem">SAVE</button><span id=m_save></span>
+<button id=b_apply style="margin-left:3rem">APPLY</button>
+<br/>
+</div>
+<div id=ebox>
+<ul class=tabs>
+   <li>
+  	<input name="tab" id="tab0" type="radio"  />
+	<label for="tab0" style="color:green">&nbsp;log&nbsp;</label>
+	<div class="contents tab0" id=log>
+		<textarea id=msglog></textarea>
+	</div>
+  </li>
+  <li>
+  	<input name="tab" id="tab1" type="radio"  />
+	<label for="tab1">setting</label>
+	<div class="contents tab1" id=e1></div>
+  </li>
+  <li>
+  	<input name="tab" id="tab2" type="radio"  checked/>
+	<label for="tab2">scene</label>
+	<div class="contents tab2" id=e2></div>
+  </li>
+  <li>
+  	<input name="tab" id="tab3" type="radio"  />
+	<label for="tab3">components</label>
+	<div class="contents tab3" id=e3></div>
+  </li>
+  <li>
+</ul> 
+</div>
+<div id=msg><div id=msgc></div></div>
+</div>
+<div class=sep id=vsep></div>
+<div class=view id=viewp>
+<div id=scene></div>
+<div id=cc>
+<span class=oswitch><label><input type=checkbox id=editor><span class=sbtn></span></label></span>
+<span class=oswitch><label><input type=checkbox id=pause><span class=sbtn></span></label></span>
+[<span id="fps"></span>FPS]
+<div id=pui>
+</div>
+</div>
+<div id=loading><img src="img/guruguru.gif"></div>
+<div id=footer></div>
+</div>
+</body>
+
+	
