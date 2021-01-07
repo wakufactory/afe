@@ -5,60 +5,118 @@
 <meta name="viewport" content="width=device-width" /> 
 <title>afe</title>
 <script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script>
+<script src="poxa.js"></script>
 <script src="afecomponents.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js" crossorigin="anonymous"></script>
 
 <script >
 function $(o) {return document.getElementById(o)}
-onload=function() {
+onload=async function() {
 	POXE.editor()
-	POXE.load() 
-}
-const POXA = {
-registerComponent:function(name,f) {
-	if(AFRAME.components[name]) delete AFRAME.components[name]
-	AFRAME.registerComponent(name,f) 
-},
-mkscene:function(data) {
-	const osc = document.querySelector("a-scene")
-	if(osc) $("scene").removeChild(osc)
-	try {
-		eval(data.components)
-	} catch(err) {
-		console.log(err)
+	POXA.init()
+	const data = await POXA.load()
+	console.log(data)
+	if(data) {
+		POXE.seteditor(data)
+		POXA.mkscene(data) 
 	}
-	const sc = document.createElement("a-scene")
-	sc.setAttribute('background','color',"#88f")
-	sc.setAttribute("embedded",true)
-	sc.innerHTML = data.scenes[0]
-	$("scene").appendChild(sc)	
 }
-}
-
 
 const POXE ={} 
-POXE.editor = function() {
+POXE.log = function(msg,stack="") {
+	if( typeof msg == "string") {
+		let p = location.protocol + "//" + location.host
+//		msg = msg.replace(new RegExp(p,"g"),"").replace(/at PoxPlayer\.\w+/g,"").replace(/at Object\.\w+/g,"").replace(/at Object\.POX\.\w+/g,"").replace(/at new Function \(.+?\)/g,"") ;
+	}
+	if($("msglog")) {
+		$("msglog").value += msg +"\n"+stack+"\n"
+  	$("msglog").scrollTop = $("msglog").scrollHeight ;
+	}
+	if(!$("msgc")) {
+		console.log(msg)
+		return
+	}
+
+	const e = document.createElement("div")
+
+	e.innerHTML =  msg
+
+	$("msgc").appendChild(e) ;
+	$("msg").scrollTop = $("msgc").offsetHeight ;
+}
+POXE.editor = async function() {
 	window.onerror = function(msg, url, line, col, error) {  
 	    console.log(`${msg} lines:${line}-${col}`); 
 	};
 	POXE.ace() ;		//editor init	
+	let curedit = POXE.e2
+	document.querySelectorAll("input[name=tab]").forEach(o=>{
+		o.addEventListener("change", ev=>{
+			switch(ev.target.id) {
+				case "tab1": curedit = POXE.e1 ; break ;
+				case "tab2": curedit = POXE.e2 ; break ;
+				case "tab3": curedit = POXE.e3 ; break ;
+			}
+			$('sn_tag').style.display=(ev.target.id=="tab2")?"inline":"none"
+			$('sn_comp').style.display=(ev.target.id=="tab2")?"inline":"none"
+			$('sn_code').style.display=(ev.target.id=="tab3")?"inline":"none"
+		})
+	})
 	$("b_apply").addEventListener("click", ()=>{
 		POXE.reload() ;
 	})
 	$("b_save").addEventListener("click", ()=>{
 		POXE.fsave()
 	})
-	$("editor").addEventListener("change", (ev)=>{
-		if(ev.target.checked) {
-			$("editp").style.display = "none" ;
-			$("viewp").style.width = "100%" ;
-		} else {
-			$("editp").style.display = "flex" ;
-			$("viewp").style.width = "50%" ;
-		}
+	$("c_stats").addEventListener("change", (ev)=>{
+		const osc = document.querySelector("a-scene")
+		if(ev.target.checked) osc.setAttribute("stats",true)
+		else osc.removeAttribute("stats")
 	})
-
 	POXE.addvcursor()
+
+	function getcbuf(){return localStorage.getItem(POXA.lskey+".clip")}
+	function setcbuf(text){return localStorage.setItem(POXA.lskey+".clip",text)}
+	$("b_selline").addEventListener("click", (ev)=>{
+		curedit.getSelection().selectLine()
+	})
+	$("b_copy").addEventListener("click", (ev)=>{
+		setcbuf(curedit.getCopyText())
+	})
+	$("b_cut").addEventListener("click", (ev)=>{
+		setcbuf(curedit.getCopyText())
+		curedit.insert("")		
+	})
+	$("b_paste").addEventListener("click", (ev)=>{
+		curedit.insert(getcbuf())	
+	})
+	$("b_undo").addEventListener("click", (ev)=>{
+		curedit.undo()	
+	})
+	const sn = await POXE.loadsnippets()
+	$("sn_tag").addEventListener("change", (ev)=>{
+		if(ev.target.value=="") return ;
+		curedit.insert(sn.tags.find(v=>v.name==ev.target.value).value)	
+		ev.target.value=""
+	})
+	$("sn_comp").addEventListener("change", (ev)=>{
+		if(ev.target.value=="") return ;
+		curedit.insert(sn.components.find(v=>v.name==ev.target.value).value)	
+		ev.target.value=""
+	})
+	$("sn_code").addEventListener("change", (ev)=>{
+		if(ev.target.value=="") return ;
+		curedit.insert(sn.code.find(v=>v.name==ev.target.value).value)	
+		ev.target.value=""
+	})
+}
+POXE.seteditor = function(data) {
+	const sc = data.scenes[0]
+	const st = data.settings
+	$('title').innerHTML = st.name 
+	POXE.e2.setValue(sc,-1)
+	POXE.e3.setValue(data.components,-1)
+	POXE.e1.setValue(JSON.stringify(data.settings),-1)
 }
 POXE.addvcursor = function() {
 	let d = document.createElement("div") 
@@ -72,6 +130,19 @@ POXE.addvcursor = function() {
 				d.style.top = `calc( ${ev.pageY}px - 0.7rem)` ;
 				d.style.left = ev.pageX + "px" ;				
 	})	
+}
+POXE.loadsnippets = async function() {
+	const s = await POXA.loadjson("./snippets.json")
+	if(s['tags']) {
+		$('sn_tag').innerHTML += s.tags.map((v)=>{return `<option>${v.name}</option>`}).join("")
+	}
+	if(s['components']) {
+		$('sn_comp').innerHTML += s.components.map((v)=>{return `<option>${v.name}</option>`}).join("")
+	}
+	if(s['code']) {
+		$('sn_code').innerHTML += s.code.map((v)=>{return `<option>${v.name}</option>`}).join("")
+	}
+	return s
 }
 
 POXE.fsave = function() {
@@ -106,52 +177,15 @@ POXE.fsave = function() {
 	$("m_save").innerHTML = "" 
 	oReq.send(oData)
 }
-POXE.loadjson = function(d) {
-	return new Promise((resolve,reject) => {
-			const req = new XMLHttpRequest();
-			req.open("get",d,true) ;
-			req.responseType = "json" ;
-			req.onload = () => {
-				if(req.status==200) {
-					resolve(req.response) ;
-				} else {
-					reject("Ajax error:"+req.statusText) ;
-				}
-			}
-			req.onerror = ()=> {
-				reject("Ajax error:"+req.statusText)
-			}
-			req.send() ;
-	})
-}
-POXE.load = async ()=> {
-	let data 
-	const query = location.search.substr(1).split("&")
-	if(query[0]!="") {
-		try {
-			data = await POXE.loadjson(query[0])
-		} catch(err) {
-			console.log(err)
-		}
-	}
-	if(!data) data = JSON.parse(localStorage.getItem("afe.polygon.work"))[0]
-	if(data) {
-		const sc = data.scenes[0]
-		const st = data.settings
-		$('title').innerHTML = st.name 
-		POXE.e2.setValue(sc,-1)
-		POXE.e3.setValue(data.components,-1)
-		POXE.e1.setValue(JSON.stringify(data.settings),-1)
-		POXE.reload() 
-	}
-}
+
 POXE.save = (data)=> {
 	data.version = "1.0" ;
 	var d = JSON.stringify([data]) ;
-	localStorage.setItem("afe.polygon.work",d)
+	localStorage.setItem(POXA.lskey+".scene",d)
 }
 
 POXE.reload = ()=> {
+	POXE.log("-----load")
 	const data = {
 		settings:JSON.parse(POXE.e1.getValue()),
 		scenes:[POXE.e2.getValue()],
@@ -194,7 +228,7 @@ POXE.ace = ()=> {
 	}
 	POXE.e1 = setace("e1","ace/mode/json")
 	POXE.e2 = setace("e2","ace/mode/html")
-	POXE.e3 = setace("e3","ace/mode/typescript") ;
+	POXE.e3 = setace("e3","ace/mode/javascript") ;
 }
 
 </script>
@@ -296,7 +330,7 @@ div.edit textarea {
 	overflow:hidden ;
 }
 #ec {
-	height:2rem ;
+	height:3.5rem ;
 	color:#eee ;
 }
 #ec a {
@@ -415,10 +449,24 @@ label,button {
 <body>
 <div class=edit id=editp>
 <div id=ec>
-<span id=title></span>
-<button id=b_save style="margin-left:10rem">SAVE</button><span id=m_save></span>
-<button id=b_apply style="margin-left:3rem">APPLY</button>
+scene:<span id=title></span>
+<button id=b_save style="margin-left:50%">SAVE</button><span id=m_save></span>
+<button id=b_apply style="margin-left:2rem">APPLY</button>
 <br/>
+<button id=b_selline>SelLine</button>
+<button id=b_cut>CUT</button>
+<button id=b_copy>COPY</button>
+<button id=b_paste>PASTE</button>
+<button id=b_undo>UNDO</button>
+<select id=sn_tag>
+<option value="">ins tag</option>
+</select>
+<select id=sn_comp>
+<option value="">ins compo</option>
+</select>
+<select id=sn_code>
+<option value="">ins code</option>
+</select>
 </div>
 <div id=ebox>
 <ul class=tabs>
@@ -453,8 +501,7 @@ label,button {
 <div class=view id=viewp>
 <div id=scene></div>
 <div id=cc>
-<span class=oswitch><label><input type=checkbox id=editor><span class=sbtn></span></label></span>
-<span class=oswitch><label><input type=checkbox id=pause><span class=sbtn></span></label></span>
+<label><input type=checkbox id=c_stats>stats</label>
 [<span id="fps"></span>FPS]
 <div id=pui>
 </div>

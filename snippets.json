@@ -1,0 +1,20 @@
+{
+	"tags":[
+		{"name":"a-entity","value":"<a-entity></a-entity>"},
+		{"name":"mixin","value":"<a-mixin id=\"\" >"},
+		{"name":"a-box","value":"<a-box position=\"\" scale=\"\" rotate=\"\"></a-box>"},
+		{"name":"img","value":"<img id=\"\" src=\"\">"},
+		{"name":"video","value":"<video id=\"\" src=\"\"></video>"},
+		{"name":"a-item","value":"<a-asset-item id=\"\" src=\"\"></a-asset-item>"}
+	],
+	"components":[
+		{"name":" animation","value":"animation=\"property: ;from: ;to: ;duration: ;loop:true\""}
+	],
+	"code":[
+		{"name":"function","value":"function(){\n}\n"},
+		{"name":"closure","value":"()=>{\n}\n"},
+		{"name":"for","value":"for(let ; ; ) {\n}\n"},
+		{"name":"if","value":"if(){}"},
+		{"name":"add component","value":"POXA.registerComponent('name',{\n\tinit:function() {\n\t},\n\tupdate_:function() {\n\t},\n\ttick:function() {\n\t},\n})"}
+	]
+}
