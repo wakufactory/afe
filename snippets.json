@@ -1,20 +1,63 @@
 {
 	"tags":[
-		{"name":"a-entity","value":"<a-entity></a-entity>"},
-		{"name":"mixin","value":"<a-mixin id=\"\" >"},
-		{"name":"a-box","value":"<a-box position=\"\" scale=\"\" rotate=\"\"></a-box>"},
-		{"name":"img","value":"<img id=\"\" src=\"\">"},
-		{"name":"video","value":"<video id=\"\" src=\"\"></video>"},
-		{"name":"a-item","value":"<a-asset-item id=\"\" src=\"\"></a-asset-item>"}
+		{"name":"a-entity","value":"<a-entity ></a-entity>\n","cback":13},
+		{"name":"a-mixin","value":"<a-mixin id=\"\" ></a-mixin>\n","cback":14},
+
+		{"name":"a-box","value":"<a-box scale=\"1 1 1\" rotate=\"0 0 0\" position=\"0 0 0\" ></a-box>\n"},
+		{"name":"a-sphere","value":"<a-sphere radius=\"1\" position=\"0 0 0\" ></a-sphere>\n"},
+		{"name":"a-cylinder","value":"<a-cylinder height=\"1\" radius=\"1\" position=\"0 0 0\" ></a-cylinder>\n"},
+		{"name":"a-plane","value":"<a-plane width=\"1\" height=\"1\" position=\"0 0 0\" ></a-plane>\n"},
+		{"name":"a-torus","value":"<a-torus arc=\"360\" radius=\"1\" radius-tubular=\"0.1\" position=\"0 0 0\" ></a-torus>\n"},
+		{"name":"a-cone","value":"<a-cone height=\"1\" radius-bottom=\"1\" radius-top=\"0\" position=\"0 0 0\" ></a-cone>\n"},
+
+		{"name":"a-text","value":"<a-text value=\"\" width=\"\" position=\"0 0 0\" ></a-text>\n"},
+		{"name":"a-image","value":"<a-image src=\"\" position=\"0 0 0\" ></a-image>\n"},
+		{"name":"a-obj-model","value":"<a-obj-model src=\"\" mtl=\"\" ></a-obj-model>\n"},
+		{"name":"a-gltf-model","value":"<a-gltf-model src=\"\" ></a-gltf-model>\n"},
+		
+		{"name":"a-light","value":"<a-light type=\"\" color=\"\" ></a-light>\n"},
+
+		{"name":"a-asset-item","value":"<a-asset-item id=\"\" src=\"\"></a-asset-item>\n"},
+		{"name":"img","value":"<img id=\"\" src=\"\">\n","cback":10},
+		{"name":"video","value":"<video id=\"\" src=\"\"></video>\n","cback":18},
+		{"name":"comment","value":"<!-- -->","cback":4}
 	],
 	"components":[
-		{"name":" animation","value":"animation=\"property: ;from: ;to: ;duration: ;loop:true\""}
+		{"name":"mixin","value":" mixin=\"\" ","cback":2},
+		{"name":"position","value":" position=\"0 0 0\" ","cback":2},
+		{"name":"rotation","value":" rotation=\"0 0 0\" ","cback":2},
+		{"name":"scale","value":" scale=\"1 1 1\" ","cback":2},
+		{"name":"radius","value":" radius=\"\" ","cback":2},
+		{"name":"width","value":" width=\"\" ","cback":2},
+		{"name":"height","value":" height=\"\" ","cback":2},
+		{"name":"color","value":" color=\"\" ","cback":2},
+		{"name":"geometry","value":" geometry=\"primitive:\" ","cback":2},
+		{"name":"material","value":" material=\"shader:standard; color:; roughness:; metalness:\" "},
+		{"name":"animation","value":" animation=\"property:; from:; to:; dur:1; easing:linear; dir:alternate; loop:true\" ","cback":62}
+	],
+	"keyword":[
+		{"name":"AFRAME","value":"AFRAME."},
+		{"name":"THREE","value":"THREE."},
+		{"name":"object3D","value":".object3D."},
+		{"name":"Math","value":"Math."},
+		{"name":"Vector2","value":"THREE.Vector2."},	
+		{"name":"Vector3","value":"THREE.Vector3."},
+		{"name":"Matrix4","value":"THREE.Matrix4."}
 	],
 	"code":[
-		{"name":"function","value":"function(){\n}\n"},
-		{"name":"closure","value":"()=>{\n}\n"},
-		{"name":"for","value":"for(let ; ; ) {\n}\n"},
-		{"name":"if","value":"if(){}"},
+		{"name":"const","value":"const "},
+		{"name":"let","value":"let "},
+		{"name":"new","value":"= new "},
+		{"name":"function","value":"function(){}\n","cback":2},
+		{"name":"closure","value":"()=>{}\n","cback":2},
+		{"name":"promise","value":"new Promise((resolve,reject)=>{})\n","cback":3},
+		{"name":"eventListener","value":"addEventListener('',(ev)=>{})\n","cback":3},
+		{"name":"querySelector","value":"querySelector('')","cback":3},
+		{"name":"setAttribute","value":"setAttribute('', )","cback":4},
+		{"name":"for","value":"for(let ; ; ) {}\n","cback":9},
+		{"name":"if","value":"if(){}","cback":3},
+		{"name":"else","value":"else{}","cback":1},
+		{"name":"ternary","value":"(( )? : )","cback":7},
 		{"name":"add component","value":"POXA.registerComponent('name',{\n\tinit:function() {\n\t},\n\tupdate_:function() {\n\t},\n\ttick:function() {\n\t},\n})"}
 	]
 }
