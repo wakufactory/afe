@@ -15,7 +15,7 @@ onload=async function() {
 	POXE.editor()
 	POXA.init()
 	let data = await POXA.load()
-	if(data==null) data = await POXA.load("save/data/template.json")
+	if(data==null) data = await POXA.load("sample/template.json")
 	if(data) {
 		POXE.seteditor(data)
 		if(data.settings.import) await POXA.setimport(data.settings.import)
