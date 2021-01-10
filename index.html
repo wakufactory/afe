@@ -8,40 +8,38 @@
 <script src="poxa.js"></script>
 <script src="afecomponents.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js" crossorigin="anonymous"></script>
-
+<script src="https://unpkg.com/vanilla-picker@2"></script>
 <script >
 function $(o) {return document.getElementById(o)}
 onload=async function() {
 	POXE.editor()
 	POXA.init()
-	const data = await POXA.load()
-	console.log(data)
+	let data = await POXA.load()
+	if(data==null) data = await POXA.load("save/data/template.json")
 	if(data) {
 		POXE.seteditor(data)
-		POXA.mkscene(data) 
-	}
+		if(data.settings.import) await POXA.setimport(data.settings.import)
+
+		POXA.mkscene(data)
+		document.title = "afe: "+data.settings.name
+	} 
 }
 
 const POXE ={} 
 POXE.log = function(msg,stack="") {
+	console.log(msg)
 	if( typeof msg == "string") {
 		let p = location.protocol + "//" + location.host
-//		msg = msg.replace(new RegExp(p,"g"),"").replace(/at PoxPlayer\.\w+/g,"").replace(/at Object\.\w+/g,"").replace(/at Object\.POX\.\w+/g,"").replace(/at new Function \(.+?\)/g,"") ;
 	}
 	if($("msglog")) {
-		$("msglog").value += msg +"\n"+stack+"\n"
-  	$("msglog").scrollTop = $("msglog").scrollHeight ;
+		$("msglog").value += msg +"\n"+((stack!="")?(stack+"\n"):"")
+		$("msglog").scrollTop = $("msglog").scrollHeight ;
 	}
 	if(!$("msgc")) {
 		console.log(msg)
 		return
 	}
-
-	const e = document.createElement("div")
-
-	e.innerHTML =  msg
-
-	$("msgc").appendChild(e) ;
+	$("msgc").innerHTML = msg.toString().substring(0,80) ;
 	$("msg").scrollTop = $("msgc").offsetHeight ;
 }
 POXE.editor = async function() {
@@ -52,14 +50,17 @@ POXE.editor = async function() {
 	let curedit = POXE.e2
 	document.querySelectorAll("input[name=tab]").forEach(o=>{
 		o.addEventListener("change", ev=>{
-			switch(ev.target.id) {
+			const id = ev.target.id
+			switch(id) {
 				case "tab1": curedit = POXE.e1 ; break ;
 				case "tab2": curedit = POXE.e2 ; break ;
 				case "tab3": curedit = POXE.e3 ; break ;
+				case "tab4": curedit = POXE.e4 ; break ;
 			}
-			$('sn_tag').style.display=(ev.target.id=="tab2")?"inline":"none"
-			$('sn_comp').style.display=(ev.target.id=="tab2")?"inline":"none"
-			$('sn_code').style.display=(ev.target.id=="tab3")?"inline":"none"
+			$('sn_tag').style.display=(id=="tab2"||id=="tab4")?"inline":"none"
+			$('sn_comp').style.display=(id=="tab2"||id=="tab4")?"inline":"none"
+			$('sn_code').style.display=(id=="tab3"||id=="tab4")?"inline":"none"
+			$('sn_kw').style.display=(id=="tab3"||id=="tab4")?"inline":"none"
 		})
 	})
 	$("b_apply").addEventListener("click", ()=>{
@@ -68,11 +69,7 @@ POXE.editor = async function() {
 	$("b_save").addEventListener("click", ()=>{
 		POXE.fsave()
 	})
-	$("c_stats").addEventListener("change", (ev)=>{
-		const osc = document.querySelector("a-scene")
-		if(ev.target.checked) osc.setAttribute("stats",true)
-		else osc.removeAttribute("stats")
-	})
+
 	POXE.addvcursor()
 
 	function getcbuf(){return localStorage.getItem(POXA.lskey+".clip")}
@@ -93,22 +90,84 @@ POXE.editor = async function() {
 	$("b_undo").addEventListener("click", (ev)=>{
 		curedit.undo()	
 	})
+	$("b_tab").addEventListener("click", (ev)=>{
+		curedit.insert("\t")		
+	})
+	$("b_kakko").addEventListener("click", (ev)=>{
+		curedit.insert("()")	
+		curedit.navigateLeft(1)		
+	})
+	$("b_bracke").addEventListener("click", (ev)=>{
+		curedit.insert("[]")	
+		curedit.navigateLeft(1)		
+	})
+	$("b_brace").addEventListener("click", (ev)=>{
+		curedit.insert("{}")	
+		curedit.navigateLeft(1)		
+	})
+	$("b_quot").addEventListener("click", (ev)=>{
+		curedit.insert("\"\"")
+		curedit.navigateLeft(1)			
+	})
+	$("b_equal").addEventListener("click", (ev)=>{
+		curedit.insert("=")		
+	})
+	$("b_semic").addEventListener("click", (ev)=>{
+		curedit.insert(";")		
+	})
+	$("b_comma").addEventListener("click", (ev)=>{
+		curedit.insert(",")		
+	})
+	$("b_sp").addEventListener("click", (ev)=>{
+		curedit.insert(" ")		
+	})
+	$("b_bs").addEventListener("click", (ev)=>{
+		const c = curedit.getCursorPosition()
+		const sel = curedit.getCopyText()
+		if(sel=="") curedit.selection.addRange(new ace.Range( c.row, c.column, (c.column>0)?c.row:c.row-1,(c.column>0)?c.column-1:999))
+		curedit.insert("")
+	})
+	$("b_ret").addEventListener("click", (ev)=>{
+		curedit.insert("\n")		
+	})
+	$("b_left").addEventListener("click", (ev)=>{
+		curedit.navigateLeft()	
+	})
+	$("b_right").addEventListener("click", (ev)=>{
+		curedit.navigateRight()	
+	})
+	$("b_up").addEventListener("click", (ev)=>{
+		curedit.navigateUp()	
+	})
+	$("b_down").addEventListener("click", (ev)=>{
+		curedit.navigateDown()	
+	})
 	const sn = await POXE.loadsnippets()
-	$("sn_tag").addEventListener("change", (ev)=>{
+	function setsni(ev,list) {
 		if(ev.target.value=="") return ;
-		curedit.insert(sn.tags.find(v=>v.name==ev.target.value).value)	
+		const s = list.find(v=>v.name==ev.target.value)
+		curedit.insert(s.value)
+		if(s.cback>0) curedit.navigateLeft(s.cback)	
 		ev.target.value=""
+		curedit.focus()		
+	}
+	$("sn_tag").addEventListener("change", (ev)=>{
+		setsni(ev,sn.tags)
 	})
 	$("sn_comp").addEventListener("change", (ev)=>{
-		if(ev.target.value=="") return ;
-		curedit.insert(sn.components.find(v=>v.name==ev.target.value).value)	
-		ev.target.value=""
+		setsni(ev,sn.components)	
 	})
 	$("sn_code").addEventListener("change", (ev)=>{
-		if(ev.target.value=="") return ;
-		curedit.insert(sn.code.find(v=>v.name==ev.target.value).value)	
-		ev.target.value=""
+		setsni(ev,sn.code)
 	})
+	$("sn_kw").addEventListener("change", (ev)=>{
+		setsni(ev,sn.keyword)
+	})
+    const picker = new Picker($('b_col'))
+    picker.onDone = (color)=>{
+	    console.log(color)
+	    curedit.insert(color.rgbaString)
+    }
 }
 POXE.seteditor = function(data) {
 	const sc = data.scenes[0]
@@ -141,6 +200,9 @@ POXE.loadsnippets = async function() {
 	}
 	if(s['code']) {
 		$('sn_code').innerHTML += s.code.map((v)=>{return `<option>${v.name}</option>`}).join("")
+	}
+	if(s['keyword']) {
+		$('sn_kw').innerHTML += s.keyword.map((v)=>{return `<option>${v.name}</option>`}).join("")
 	}
 	return s
 }
@@ -197,7 +259,7 @@ POXE.reload = ()=> {
 
 POXE.ace = ()=> {
 	ace.config.set('basePath', "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/") 
-	var fontsize = (document.body.offsetWidth<1000)?12:14 ;
+	var fontsize = (document.body.offsetWidth<1200)?12:14 ;
 	var theme = "ace/theme/tomorrow_night" ;
 	var keybind = {
 	    name: 'save',
@@ -228,7 +290,8 @@ POXE.ace = ()=> {
 	}
 	POXE.e1 = setace("e1","ace/mode/json")
 	POXE.e2 = setace("e2","ace/mode/html")
-	POXE.e3 = setace("e3","ace/mode/javascript") ;
+	POXE.e3 = setace("e3","ace/mode/javascript")
+	POXE.e4 = setace("e4","ace/mode/text")
 }
 
 </script>
@@ -246,7 +309,8 @@ body {
 	font-family:sans-serif ;
 }
 button {
-	font-size:0.8rem 
+	font-size:0.8rem ;
+	font-weight:bold;
 }
 div.edit {
 	display:flex ;
@@ -300,6 +364,10 @@ div.edit textarea {
 #ebox {
 	height:calc(100% - 6rem) ;
 }
+#abtn {
+	width:12rem ;
+	margin-left:auto;
+}
 #cc {
 	position:absolute ;
 	top:0;
@@ -336,9 +404,11 @@ div.edit textarea {
 #ec a {
 	color:#eee ;	
 }
-
+#ecd {
+	min-height:3rem ;
+}
 #msg {
-	height:4rem ;
+	height:2rem ;
 	background-color:#444 ;
 	color:#eee ;
 	overflow-y:scroll ;
@@ -412,13 +482,17 @@ label,button {
 	display:none ;
 }
 .oswitch .sbtn {
+	padding:0 0.5rem 0 0.5rem ;
+	border:1px solid black ;
+	background-color:white ;
+	color:black ;
 	font-family:"apple color emoji",sans-serif;
 }
 .oswitch input[id=pause] + .sbtn:before {
-	content: "P" ;
+	content: "STOP" ;
 }
 .oswitch input[id=pause]:checked + .sbtn:before {
-	content: ">" ;
+	content: "START" ;
 }
 .oswitch input[id=editor] + .sbtn:before {
 	content: "<" ;
@@ -445,55 +519,96 @@ label,button {
 	color:white;
 	font-size:12px;
 }
+.ace-tomorrow-night .ace_cursor {
+  color: #fff;
+}
+.ace_hidden-cursors .ace_cursor {
+    opacity: 0.5;
+}
+.ace-tomorrow-night .ace_marker-layer .ace_selection {
+    background: #596a84;
+}
 </style>
 <body>
 <div class=edit id=editp>
 <div id=ec>
-scene:<span id=title></span>
-<button id=b_save style="margin-left:50%">SAVE</button><span id=m_save></span>
+<div style="display:flex">
+[AFEQ] scene:<span id=title></span>
+<div id=abtn>
+<button id=b_save >SAVE</button><span id=m_save></span>
 <button id=b_apply style="margin-left:2rem">APPLY</button>
-<br/>
-<button id=b_selline>SelLine</button>
+</div>
+</div>
+<button id=b_selline title="select line">SelLine</button>
 <button id=b_cut>CUT</button>
 <button id=b_copy>COPY</button>
 <button id=b_paste>PASTE</button>
 <button id=b_undo>UNDO</button>
-<select id=sn_tag>
-<option value="">ins tag</option>
-</select>
-<select id=sn_comp>
-<option value="">ins compo</option>
-</select>
-<select id=sn_code>
-<option value="">ins code</option>
-</select>
+&nbsp;&nbsp;
+<button id=b_col>COLOR</button>
 </div>
 <div id=ebox>
 <ul class=tabs>
    <li>
   	<input name="tab" id="tab0" type="radio"  />
-	<label for="tab0" style="color:green">&nbsp;log&nbsp;</label>
+	<label for="tab0" style="color:red">&nbsp;LOG&nbsp;</label>
 	<div class="contents tab0" id=log>
 		<textarea id=msglog></textarea>
 	</div>
   </li>
   <li>
   	<input name="tab" id="tab1" type="radio"  />
-	<label for="tab1">setting</label>
+	<label for="tab1">SETTING</label>
 	<div class="contents tab1" id=e1></div>
   </li>
   <li>
   	<input name="tab" id="tab2" type="radio"  checked/>
-	<label for="tab2">scene</label>
+	<label for="tab2">SCENE</label>
 	<div class="contents tab2" id=e2></div>
   </li>
   <li>
   	<input name="tab" id="tab3" type="radio"  />
-	<label for="tab3">components</label>
+	<label for="tab3">COMPONENTS</label>
 	<div class="contents tab3" id=e3></div>
   </li>
   <li>
+  	<input name="tab" id="tab4" type="radio"  />
+	<label for="tab4" style="color:green">memo</label>
+	<div class="contents tab4" id=e4></div>
+  </li>
+  <li>
 </ul> 
+</div>
+<div id=ecd>
+
+<select id=sn_tag style="width:5rem">
+<option value="">ins tag</option>
+</select>
+<select id=sn_comp>
+<option value="">ins compo</option>
+</select>
+<select id=sn_kw style="display:none;width:6rem">
+<option value="">ins word</option>
+</select>
+<select id=sn_code style="display:none;width:6rem">
+<option value="">ins code</option>
+</select>
+<br/>
+<button id=b_tab>TAB</button>
+<button id=b_kakko>()</button>
+<button id=b_bracke>[]</button>
+<button id=b_brace>{}</button>
+<button id=b_quot>""</button>
+<button id=b_equal>=</button>
+<button id=b_semic>;</button>
+<button id=b_comma>,</button>
+<button id=b_sp>SP</button>
+<button id=b_bs>BS</button>
+<button id=b_ret>RET</button>
+<button id=b_left>⬅️</button>
+<button id=b_up>⬆️</button>
+<button id=b_down>⬇️</button>
+<button id=b_right>➡️</button>
 </div>
 <div id=msg><div id=msgc></div></div>
 </div>
@@ -502,11 +617,11 @@ scene:<span id=title></span>
 <div id=scene></div>
 <div id=cc>
 <label><input type=checkbox id=c_stats>stats</label>
-[<span id="fps"></span>FPS]
+[<span id="fps"></span>]
+<span class=oswitch><label><input type=checkbox id=pause><span class=sbtn></span></label></span>
 <div id=pui>
 </div>
 </div>
-<div id=loading><img src="img/guruguru.gif"></div>
 <div id=footer></div>
 </div>
 </body>

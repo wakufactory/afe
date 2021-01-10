@@ -44,9 +44,19 @@ mkscene:function(data) {
 }
 }
 POXA.init = function() {
+	$("c_stats")?.addEventListener("change", (ev)=>{
+		const osc = document.querySelector("a-scene")
+		if(ev.target.checked) osc.setAttribute("stats",true)
+		else osc.removeAttribute("stats")
+	})
+	$("pause")?.addEventListener("change", (ev)=>{
+		const osc = document.querySelector("a-scene")
+		osc.setAttribute("visible", !ev.target.checked)
+	})
+	
 	POXA.registerComponent('fps',{
 		init:function() {
-			this.buf = [0,0,0,0,0,0,0,0,0]
+			this.buf = new Array(60)
 			this.bi = 0 
 			this.lt = 0
 		},
@@ -56,7 +66,8 @@ POXA.init = function() {
 			if(Math.floor(time/500)!=this.lt) {
 				this.lt = Math.floor(time/500)
 				let fps = 1000/this.buf.reduce((a,v)=>{return a+v},0)*this.buf.length+0.05
-				$('fps').innerHTML = fps.toString().substr(0,4)
+				let info = this.el.sceneEl.renderer.info.render
+				if($('fps')) $('fps').innerHTML = `${info.calls} CALLS/${info.triangles}△/${fps.toString().substr(0,4)}FPS`
 			}
 		}	
 	})	
@@ -79,18 +90,40 @@ POXA.loadjson = function(path) {
 		req.send() ;
 	})
 }
-POXA.load = async ()=> {
-	let data 
+POXA.load = async (path)=> {
+	let data = null 
 	const query = location.search.substr(1).split("&")
-	if(query[0].match(/\.json$/)) {
+	let url 
+	if(path) url = path 
+	else if(query[0].match(/\.json$/)) url = query[0]
+	
+	if(url) {
 		try {
-			data = await POXA.loadjson(query[0])
+			data = await POXA.loadjson(url)
 		} catch(err) {
 			console.log(err)
 		}
 	}
-	if(!data) data = JSON.parse(localStorage.getItem(POXA.lskey+".scene"))[0]
+	if(!data) {
+		data = JSON.parse(localStorage.getItem(POXA.lskey+".scene"))
+		if(data) data = data[0]
+	}
 	if(query[1]) POXA.query = query.slice(1)
 	return data 
+}
+POXA.setimport = async function(list) {
+	const pl = []
+	list.forEach(a=>{
+		const p = new Promise((resolve,reject)=>{
+			const el = document.createElement("script")
+			el.src = a 
+			el.onload = (e)=>{
+				resolve()
+			}
+			document.head.appendChild(el)
+		})
+		pl.push(p)
+	})
+	return Promise.all(pl)
 }
 
