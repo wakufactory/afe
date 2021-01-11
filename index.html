@@ -69,7 +69,12 @@ POXE.editor = async function() {
 	$("b_save").addEventListener("click", ()=>{
 		POXE.fsave()
 	})
-
+	$("b_up").addEventListener("click", ()=>{
+		$("l_load").click()
+	})
+	$("l_load").addEventListener("change", (ev)=>{
+		console.log(ev.target.files)
+	})
 	POXE.addvcursor()
 
 	function getcbuf(){return localStorage.getItem(POXA.lskey+".clip")}
@@ -225,7 +230,6 @@ POXE.fsave = function() {
 	oReq.onload = function(oEvent) {
 		if (oReq.status == 200) {
 			if(oReq.response && oReq.response.status==0) {
-				$("m_save").innerHTML = "saved"
 				if(POXE.loadfile!=f) {
 					location.href = `?save/data/${f}.json`
 				}
@@ -365,7 +369,7 @@ div.edit textarea {
 	height:calc(100% - 6rem) ;
 }
 #abtn {
-	width:12rem ;
+	width:21rem ;
 	margin-left:auto;
 }
 #cc {
@@ -535,6 +539,8 @@ label,button {
 <div style="display:flex">
 [AFEQ] scene:<span id=title></span>
 <div id=abtn>
+<a href="" id=l_save download="save.json"><button>Download</button></a>
+<label><input type=file id=l_load style="display:none"><button id=b_up>Upload</button></label>
 <button id=b_save >SAVE</button><span id=m_save></span>
 <button id=b_apply style="margin-left:2rem">APPLY</button>
 </div>

@@ -33,7 +33,7 @@
 		{"name":"color","value":" color=\"\" ","cback":2},
 		{"name":"geometry","value":" geometry=\"primitive:\" ","cback":2},
 		{"name":"material","value":" material=\"shader:standard; color:; roughness:; metalness:\" "},
-		{"name":"animation","value":" animation=\"property:; from:; to:; dur:1; easing:linear; dir:alternate; loop:true\" ","cback":62}
+		{"name":"animation","value":" animation=\"property:; from:; to:; dur:1000; easing:linear; dir:alternate; loop:true\" ","cback":65}
 	],
 	"keyword":[
 		{"name":"AFRAME","value":"AFRAME."},
@@ -58,6 +58,7 @@
 		{"name":"if","value":"if(){}","cback":3},
 		{"name":"else","value":"else{}","cback":1},
 		{"name":"ternary","value":"(( )? : )","cback":7},
-		{"name":"add component","value":"POXA.registerComponent('name',{\n\tinit:function() {\n\t},\n\tupdate_:function() {\n\t},\n\ttick:function() {\n\t},\n})"}
+		{"name":"add component","value":"POXA.registerComponent('name',{\n\tinit:function() {\n\t},\n\tupdate:function() {\n\t},\n\ttick:function() {\n\t},\n})"},
+		{"name":"add shader","value":"POXA.registerShader('name',{\n\tschema:{\n\t},\n\trow:false,\n\tvertexShader:`\n`,\n\tfragmentShader:`\n`\n})"}
 	]
 }

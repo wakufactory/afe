@@ -8,6 +8,14 @@ registerComponent:function(name,f) {
 	if(AFRAME.components[name]) delete AFRAME.components[name]
 	AFRAME.registerComponent(name,f) 
 },
+registerShader:function(name,f) {
+	if(AFRAME.shaders[name]) delete AFRAME.shaders[name]
+	AFRAME.registerShader(name,f) 
+},
+registerSystem:function(name,f) {
+	if(AFRAME.systems[name]) delete AFRAME.systems[name]
+	AFRAME.registerSystem(name,f) 
+},
 mkscene:function(data) {
 	const osc = document.querySelector("a-scene")
 	if(osc) $("scene").removeChild(osc)
@@ -51,7 +59,7 @@ POXA.init = function() {
 	})
 	$("pause")?.addEventListener("change", (ev)=>{
 		const osc = document.querySelector("a-scene")
-		osc.setAttribute("visible", !ev.target.checked)
+		ev.target.checked?osc.pause():osc.play()
 	})
 	
 	POXA.registerComponent('fps',{
