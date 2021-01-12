@@ -21,34 +21,45 @@ mkscene:function(data) {
 	if(osc) $("scene").removeChild(osc)
 	let ev 
 	try {
-		ev = new Function("POXA",'(function(){'+data.components+'})()')
+		ev = new Function("POXA",''+data.components+'')
 	} catch(err) {
 		console.log("catch eval")
 		POXA.log(err,err.stack)
 		return 
 	}
+	let ret 
 	try {
-		ev(POXA)
+		ret = ev(POXA)
 	} catch(err) {
 		console.log("catch eval")
 		POXA.log(err,err.stack)
 		return 
 	}
-	POXA.log("regist component")
-	const sc = document.createElement("a-scene")
-	sc.setAttribute('background','color',"#88f")
-	sc.setAttribute("embedded",true)
-	sc.setAttribute("fps",true)
-	sc.setAttribute("sceneinit",{query:POXA.query?.join(",")})
-	sc.innerHTML = data.scenes[0]
-	try {
-		$("scene").appendChild(sc)
-	}catch(err) {
-		console.log("cache append")
-		POXA.log(err,err.stack)
-		return 
+	if(ret !==undefined) {
+		if(ret.constructor==Promise) {
+			ret.then(data=>{
+				console.log("completed")
+				addscene()
+			})
+		}
+	} else addscene()
+	function addscene() {
+		POXA.log("regist component")
+		const sc = document.createElement("a-scene")
+		sc.setAttribute('background','color',"#88f")
+		sc.setAttribute("embedded",true)
+		sc.setAttribute("fps",true)
+		sc.setAttribute("sceneinit",{query:POXA.query?.join(",")})
+		sc.innerHTML = data.scenes[0]
+		try {
+			$("scene").appendChild(sc)
+		}catch(err) {
+			console.log("cache append")
+			POXA.log(err,err.stack)
+			return 
+		}
+		POXA.log("scene set OK")
 	}
-	POXA.log("scene set OK")
 }
 }
 POXA.init = function() {
