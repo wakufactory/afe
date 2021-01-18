@@ -18,8 +18,8 @@ onload=async function() {
 	if(data) {
 		POXE.seteditor(data)
 		if(data.settings.import) await POXA.setimport(data.settings.import)
-
-		POXA.mkscene(data)
+		POXA.initscene()
+		POXA.loadscene(data)
 		document.title = "afe: "+data.settings.name
 	} 
 }
@@ -185,7 +185,7 @@ POXE.seteditor = function(data) {
 	$('title').innerHTML = st.name 
 	POXE.e2.setValue(sc,-1)
 	POXE.e3.setValue(data.components,-1)
-	POXE.e1.setValue(JSON.stringify(data.settings),-1)
+	POXE.e1.setValue(AFRAME.utils.styleParser.stringify(data.settings),-1)
 }
 POXE.addvcursor = function() {
 	let d = document.createElement("div") 
@@ -220,7 +220,7 @@ POXE.loadsnippets = async function() {
 POXE.fsave = function() {
 	const data = {
 		version:1.0,
-		settings:JSON.parse(POXE.e1.getValue()),
+		settings:AFRAME.utils.styleParser.parse(POXE.e1.getValue()),
 		scenes:[POXE.e2.getValue()],
 		components:POXE.e3.getValue()
 	}
@@ -258,11 +258,12 @@ POXE.save = (data)=> {
 POXE.reload = ()=> {
 	POXE.log("-----load")
 	const data = {
-		settings:JSON.parse(POXE.e1.getValue()),
+		settings:AFRAME.utils.styleParser.parse(POXE.e1.getValue()),
 		scenes:[POXE.e2.getValue()],
 		components:POXE.e3.getValue()
 	}
-	POXA.mkscene(data)
+	POXA.initscene()
+	POXA.loadscene(data)
 	POXE.save(data) 
 }
 
@@ -297,7 +298,7 @@ POXE.ace = ()=> {
 		e.commands.addCommand(keybind2);	
 		return e
 	}
-	POXE.e1 = setace("e1","ace/mode/json")
+	POXE.e1 = setace("e1","ace/mode/text")
 	POXE.e2 = setace("e2","ace/mode/html")
 	POXE.e3 = setace("e3","ace/mode/typescript")
 	POXE.e4 = setace("e4","ace/mode/text")

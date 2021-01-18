@@ -6,19 +6,36 @@ log:function(msg) {
 },
 registerComponent:function(name,f) {
 	if(AFRAME.components[name]) delete AFRAME.components[name]
-	AFRAME.registerComponent(name,f) 
+	AFRAME.registerComponent(name,f)
+	POXA.log("regist component "+name)
 },
 registerShader:function(name,f) {
 	if(AFRAME.shaders[name]) delete AFRAME.shaders[name]
 	AFRAME.registerShader(name,f) 
+	POXA.log("regist shader "+name)
 },
 registerSystem:function(name,f) {
 	if(AFRAME.systems[name]) delete AFRAME.systems[name]
 	AFRAME.registerSystem(name,f) 
+	POXA.log("regist system "+name)
 },
-mkscene:function(data) {
+registerGeometry:function(name,f) {
+	if(AFRAME.geometries[name]) delete AFRAME.geometries[name]
+	AFRAME.registerGeometry(name,f) 
+	POXA.log("regist geometry "+name)
+},
+initscene:function() {
 	const osc = document.querySelector("a-scene")
 	if(osc) $("scene").removeChild(osc)
+		const sc = document.createElement("a-scene")
+		sc.setAttribute('background','color',"#88f")
+		sc.setAttribute("embedded",true)
+		sc.setAttribute("fps",true)
+		sc.setAttribute("sceneinit",{query:POXA.query?.join(",")})	
+		$("scene").appendChild(sc)
+		POXA.scene = sc 
+},
+loadscene:function(data) {
 	let ev 
 	try {
 		ev = new Function("POXA",''+data.components+'')
@@ -44,15 +61,13 @@ mkscene:function(data) {
 		}
 	} else addscene()
 	function addscene() {
-		POXA.log("regist component")
-		const sc = document.createElement("a-scene")
-		sc.setAttribute('background','color',"#88f")
-		sc.setAttribute("embedded",true)
-		sc.setAttribute("fps",true)
-		sc.setAttribute("sceneinit",{query:POXA.query?.join(",")})
-		sc.innerHTML = data.scenes[0]
+		const dc = document.createElement("a-entity")
+		dc.innerHTML = data.scenes[0]
 		try {
-			$("scene").appendChild(sc)
+//			POXA.scene.appendChild(dc)
+			Array.of(...dc.childNodes).forEach(o=>{
+				POXA.scene.appendChild(o)
+			})
 		}catch(err) {
 			console.log("cache append")
 			POXA.log(err,err.stack)
