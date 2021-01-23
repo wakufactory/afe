@@ -17,9 +17,9 @@ onload=async function() {
 	if(data==null) data = await POXA.load("sample/template.json")
 	if(data) {
 		POXE.seteditor(data)
-		if(data.settings.import) await POXA.setimport(data.settings.import)
+		if(data.settings.import) await POXA.setimport(data.settings.import.split(","))
 		POXA.initscene()
-		POXA.loadscene(data)
+		POXA.loadscene(data,{id:"main"})
 		document.title = "afe: "+data.settings.name
 	} 
 }

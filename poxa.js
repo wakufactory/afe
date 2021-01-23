@@ -31,11 +31,11 @@ initscene:function() {
 		sc.setAttribute('background','color',"#88f")
 		sc.setAttribute("embedded",true)
 		sc.setAttribute("fps",true)
-		sc.setAttribute("sceneinit",{query:POXA.query?.join(",")})	
+		sc.setAttribute("sceneinit","query:"+POXA.query?.join(","))	
 		$("scene").appendChild(sc)
 		POXA.scene = sc 
 },
-loadscene:function(data) {
+loadscene:function(data,attr) {
 	let ev 
 	try {
 		ev = new Function("POXA",''+data.components+'')
@@ -56,20 +56,26 @@ loadscene:function(data) {
 		if(ret.constructor==Promise) {
 			ret.then(data=>{
 				console.log("completed")
-				addscene()
+				addscene(attr)
 			})
 		}
-	} else addscene()
-	function addscene() {
+	} else addscene(attr)
+	function addscene(attr) {
 		const dc = document.createElement("a-entity")
+		for(let p in attr) dc.setAttribute(p,attr[p])
 		dc.innerHTML = data.scenes[0]
-		try {
-//			POXA.scene.appendChild(dc)
-			Array.of(...dc.childNodes).forEach(o=>{
+		dc.childNodes.forEach(o=>{
+			if(o.tagName=="A-ASSETS") {
 				POXA.scene.appendChild(o)
-			})
+			}
+			if(attr?.import && o.id=="camrig") {
+				dc.removeChild(o)
+			}
+		})
+		try {
+			POXA.scene.appendChild(dc)			
 		}catch(err) {
-			console.log("cache append")
+			console.log("catch append")
 			POXA.log(err,err.stack)
 			return 
 		}
@@ -136,6 +142,7 @@ POXA.load = async (path)=> {
 			data = await POXA.loadjson(url)
 		} catch(err) {
 			console.log(err)
+			return null 
 		}
 	}
 	if(!data) {
@@ -145,6 +152,13 @@ POXA.load = async (path)=> {
 	if(query[1]) POXA.query = query.slice(1)
 	return data 
 }
+POXA.importScene = async function(path,attr) {
+	const data = await POXA.load(path)
+	console.log(data)
+	if(data!==null) {
+		POXA.loadscene(data,attr)
+	}
+} 
 POXA.setimport = async function(list) {
 	const pl = []
 	list.forEach(a=>{
