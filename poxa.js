@@ -34,8 +34,11 @@ initscene:function() {
 		sc.setAttribute("sceneinit","query:"+POXA.query?.join(","))	
 		$("scene").appendChild(sc)
 		POXA.scene = sc 
+		$('pui').innerHTML = ""
+		POXA.uprop = null 
 },
 loadscene:function(data,attr) {
+
 	let ev 
 	try {
 		ev = new Function("POXA",''+data.components+'')
@@ -61,6 +64,19 @@ loadscene:function(data,attr) {
 		}
 	} else addscene(attr)
 	function addscene(attr) {
+		if(!attr || !attr.import) {
+			const osc = document.querySelector("a-scene")
+			if(osc) $("scene").removeChild(osc)
+			const sc = document.createElement("a-scene")
+			sc.setAttribute('background','color',"#88f")
+			sc.setAttribute("embedded",true)
+			sc.setAttribute("fps",true)
+			sc.setAttribute("sceneinit","query:"+POXA.query?.join(","))	
+			POXA.scene = sc 
+			$("scene").appendChild(sc )
+			$('pui').innerHTML = ""
+			POXA.uprop = null 		
+		}
 		const dc = document.createElement("a-entity")
 		for(let p in attr) dc.setAttribute(p,attr[p])
 		dc.innerHTML = data.scenes[0]
@@ -175,3 +191,75 @@ POXA.setimport = async function(list) {
 	return Promise.all(pl)
 }
 
+POXA.setUIproperty = function(prop,cb=null) {
+	if(prop===undefined) return ;
+	const dom = $('pui')
+	if(!dom) return ;
+	if(!POXA.uprop) POXA.uprop = WBind.create()
+	let tag 
+	for(let i in prop) {
+		const p = prop[i] ;
+		const name = (p.name)?p.name:i ;
+		let size = ""
+		if(!p.type) p.type = "range" 
+		if(!p.step) p.step = 100 ;
+		if(p.size) size = "size="+p.size
+		tag = document.createElement("div")
+		tag.className = "b"
+		tag.innerHTML = `<div class=t>${name}</div> <input type=${p.type} id="_p_${i}" ${size} min=0 max=${p.step} style="${(p.type=="disp")?"display:none":""}"  /><div class=v id=${"_p_d_"+i}></div>`
+		dom.appendChild(tag)
+	}
+	function _tohex(v) {
+		let s = (v*255).toString(16) ;
+		if(s.length==1) s = "0"+s ;
+		return s ;
+	}
+	function _setdisp(i,v) {
+		if(v===undefined || prop[i].type=="file"|| prop[i].type=="text"|| prop[i].type=="button") return 
+		if(prop[i].type=="color" && v ) {
+			console.log(v)
+			document.getElementById('_p_d_'+i).innerHTML = v.map((v)=>v.toString().substr(0,5)) ;
+		} else if(prop[i].type=="range")  {
+			if(prop[i].enum) {
+				document.getElementById('_p_d_'+i).innerHTML = prop[i].enum[Math.floor(v)]
+			} else document.getElementById('_p_d_'+i).innerHTML = v.toString().substr(0,5) ;	
+		} else document.getElementById('_p_d_'+i).innerHTML = v
+	}
+	for(let i in prop) {
+		let p = prop[i]
+		POXA.uprop.bindInput(i,"#_p_"+i)
+		POXA.uprop.setFunc(i,{
+			set:(v)=> {
+				let ret = v ;
+				if(p.type=="color") {
+					ret = "#"+_tohex(v[0])+_tohex(v[1])+_tohex(v[2])
+				} else if(p.type=="range") {
+					if(p.scale=="log10") ret = Math.log10(v/p.min)/Math.log10(p.max/p.min)*p.step
+					else ret = (v - p.min)*(p.step)/(p.max - p.min)
+				}
+//				console.log(ret)
+				_setdisp(i,ret)
+				return ret 	
+			},
+			get:(v)=> {
+				let ret = v ;
+				if(p.type=="color" ) {
+					if(typeof v =="string" && v.match(/#[0-9A-F]+/i)) {
+						ret =[parseInt(v.substr(1,2),16)/255,parseInt(v.substr(3,2),16)/255,parseInt(v.substr(5,2),16)/255] ;
+					} else ret = v ;
+				} else if(p.type=="range" ) {
+					if(p.scale=="log10") ret = Math.pow(10,Math.log10(p.min)+Math.log10(p.max/p.min)*v/p.step)
+					else ret = v*(p.max-p.min)/(p.step)+p.min 
+				}		
+				return ret ;
+			},
+			input:(v)=>{
+				_setdisp(i,POXA.uprop[i])
+//				this.keyElelment.focus()
+//				this.callEvent("prop",{key:i,value:v})
+				if(cb) cb({key:i,value:v})
+			}
+		})
+		POXA.uprop[i] = p.value ;
+	}
+}
