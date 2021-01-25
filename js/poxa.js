@@ -29,7 +29,7 @@ initscene:function() {
 	if(osc) $("scene").removeChild(osc)
 		const sc = document.createElement("a-scene")
 		sc.setAttribute('background','color',"#88f")
-		sc.setAttribute("embedded",true)
+		sc.setAttribute("embedded","true")
 		sc.setAttribute("fps",true)
 		sc.setAttribute("sceneinit","query:"+POXA.query?.join(","))	
 		$("scene").appendChild(sc)
@@ -108,7 +108,14 @@ POXA.init = function() {
 		const osc = document.querySelector("a-scene")
 		ev.target.checked?osc.pause():osc.play()
 	})
-	
+	document.addEventListener('fullscreenchange', (event) => {
+		if(document.fullscreenElement) {
+				if($('editp')) $('editp').style.display = "none"
+				document.querySelector("a-scene").emit("exit-vr")	
+		} else {
+				if($('editp')) $('editp').style.display = "block"	
+		}
+	})	
 	POXA.registerComponent('fps',{
 		init:function() {
 			this.buf = new Array(60)

@@ -323,15 +323,17 @@ button {
 div.edit {
 	display:flex ;
 	flex-direction: column;
-	width:calc(60% - 5px) ;
+	width:calc(50% - 5px) ;
 	height:100% ;
 	background-color:#222 ;
+	z-index:2 ;
 }
 div.view {
 	position:relative ;
 	display:flex ;
+	flex-grow:2;
 	flex-direction: column;
-	width:50%;
+	width:auto;
 	height:100% ;
 	overflow:hidden ;
 }
