@@ -1,7 +1,7 @@
 const POXA = {
 lskey:"afe.polygon.work",
 log:function(msg) {
-	if(POXE) POXE.log(msg)
+	if(window.POXE) POXE.log(msg)
 	else console.log(msg)
 },
 registerComponent:function(name,f) {
@@ -38,7 +38,6 @@ initscene:function() {
 		POXA.uprop = null 
 },
 loadscene:function(data,attr) {
-
 	let ev 
 	try {
 		ev = new Function("POXA",''+data.components+'')
@@ -191,10 +190,13 @@ POXA.setimport = async function(list) {
 	return Promise.all(pl)
 }
 
-POXA.setUIproperty = function(prop,cb=null) {
+POXA.setUIproperty = function(comp,prop,cb=null) {
 	if(prop===undefined) return ;
 	const dom = $('pui')
 	if(!dom) return ;
+	const cname = comp.name 
+	if(!cname) cname="" 
+	console.log(cname)
 	if(!POXA.uprop) POXA.uprop = WBind.create()
 	let tag 
 	for(let i in prop) {
@@ -206,7 +208,7 @@ POXA.setUIproperty = function(prop,cb=null) {
 		if(p.size) size = "size="+p.size
 		tag = document.createElement("div")
 		tag.className = "b"
-		tag.innerHTML = `<div class=t>${name}</div> <input type=${p.type} id="_p_${i}" ${size} min=0 max=${p.step} style="${(p.type=="disp")?"display:none":""}"  /><div class=v id=${"_p_d_"+i}></div>`
+		tag.innerHTML = `<div class=t>${name}</div> <input type=${p.type} id="_p_${cname}_${i}" ${size} min=0 max=${p.step} style="${(p.type=="disp")?"display:none":""}"  /><div class=v id=${"_p_d_"+cname+"_"+i}></div>`
 		dom.appendChild(tag)
 	}
 	function _tohex(v) {
@@ -216,18 +218,18 @@ POXA.setUIproperty = function(prop,cb=null) {
 	}
 	function _setdisp(i,v) {
 		if(v===undefined || prop[i].type=="file"|| prop[i].type=="text"|| prop[i].type=="button") return 
+		const dobj = document.getElementById(`_p_d_${cname}_`+i)
 		if(prop[i].type=="color" && v ) {
-			console.log(v)
-			document.getElementById('_p_d_'+i).innerHTML = v.map((v)=>v.toString().substr(0,5)) ;
+			dobj.innerHTML = v.map((v)=>v.toString().substr(0,5)) ;
 		} else if(prop[i].type=="range")  {
 			if(prop[i].enum) {
-				document.getElementById('_p_d_'+i).innerHTML = prop[i].enum[Math.floor(v)]
-			} else document.getElementById('_p_d_'+i).innerHTML = v.toString().substr(0,5) ;	
-		} else document.getElementById('_p_d_'+i).innerHTML = v
+				dobj.innerHTML = prop[i].enum[Math.floor(v)]
+			} else dobj.innerHTML = v.toString().substr(0,5) ;	
+		} else dobj.innerHTML = v
 	}
 	for(let i in prop) {
 		let p = prop[i]
-		POXA.uprop.bindInput(i,"#_p_"+i)
+		POXA.uprop.bindInput(i,"#_p_"+cname+"_"+i)
 		POXA.uprop.setFunc(i,{
 			set:(v)=> {
 				let ret = v ;
@@ -250,14 +252,14 @@ POXA.setUIproperty = function(prop,cb=null) {
 				} else if(p.type=="range" ) {
 					if(p.scale=="log10") ret = Math.pow(10,Math.log10(p.min)+Math.log10(p.max/p.min)*v/p.step)
 					else ret = v*(p.max-p.min)/(p.step)+p.min 
-				}		
+				}
 				return ret ;
 			},
 			input:(v)=>{
 				_setdisp(i,POXA.uprop[i])
 //				this.keyElelment.focus()
 //				this.callEvent("prop",{key:i,value:v})
-				if(cb) cb({key:i,value:v})
+				if(cb) cb({key:i,value:POXA.uprop[i]})
 			}
 		})
 		POXA.uprop[i] = p.value ;
