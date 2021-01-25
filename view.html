@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width" /> 
+<title>afe view</title>
+<script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script>
+<script src="js/poxa.js"></script>
+<script src="js/WBind.js"></script>
+<script src="components/afecomponents.js"></script>
+<script src="https://unpkg.com/vanilla-picker@2"></script>
+<script >
+function $(o) {return document.getElementById(o)}
+onload=async function() {
+	POXA.init()
+	let data = await POXA.load()
+	if(data==null) data = await POXA.load("sample/template.json")
+	if(data) {
+		if(data.settings.import) await POXA.setimport(data.settings.import.split(","))
+		POXA.loadscene(data,{id:"main"})
+		document.title = "afe: "+data.settings.name
+	} 
+}
+
+</script>
+<style>
+body,html {
+	margin:0 ;
+	width:100% ;
+	height:100% ;
+	font-size:12px ;
+}
+body {
+	display:flex ;
+	box-sizing: border-box ;
+	font-family:sans-serif ;
+}
+button {
+	font-size:0.8rem ;
+	font-weight:bold;
+}
+div.view {
+	position:relative ;
+	display:flex ;
+	flex-direction: column;
+	width:100%;
+	height:100% ;
+	overflow:hidden ;
+}
+@media (max-aspect-ratio: 5/4 ) {
+	body {
+			flex-direction: column;
+	}
+	div.view {
+		height:100%;
+		width:100% ;
+		order:1 ;
+	}
+}
+div.view canvas {
+	width:100% ;
+	height:100% ;
+}
+#abtn {
+	width:21rem ;
+	margin-left:auto;
+}
+#cc {
+	position:absolute ;
+	top:0;
+	left:0;
+	color:#eee ;
+	background-color:#222 ;
+	opacity:0.6 ;
+	vertical-align:baseline;
+}
+#info{
+	background:white;
+	margin:0 1rem 0 1rem ;
+	padding:0 0.6rem 0 0.6rem ;
+	color:black ;
+	border:1px sold white ;
+	border-radius:8px ;
+	cursor:pointer ;
+}
+#infow {
+	display:none ;
+	box-sizing: border-box ;
+	position:absolute ;
+	width:80% ;
+	height:80% ;
+	top:10% ;
+	left:10% ;
+	padding:2rem ;
+	background:#444 ;
+	color:white ;
+	z-index:100;
+}
+#infoc {
+	width:3rem ;
+	font-size:2rem ;
+	margin-left:auto ;
+	cursor:pointer; 
+}
+#scene {
+	width:100%;
+	height:100% ;
+}
+#pui {
+	margin-top:1rem ;
+}
+#pui div.b{
+	display:flex ;
+}
+#pui input {
+	font-size:0.8rem ;
+}
+#pui div.t {
+	width:4rem ;
+	padding-left:0.2rem ;
+	overflow:hidden ;
+}
+#pui div.v {
+	width:4rem ;
+	padding-left:0.5rem ;
+	overflow:hidden ;
+}
+
+#loading {
+	position:absolute ;
+	top:0;
+	left:0;
+	width:100% ;
+	height:100% ;	
+	pointer-events: none ;
+	display:none;
+}
+#loading img {
+	margin-top:calc(50vh - 33px) ;
+	margin-left:calc(25vw  - 33px);
+}
+label,button {
+	cursor:pointer ;	
+}
+/* swicth (single checkbox) */
+.oswitch input {
+	display:none ;
+}
+.oswitch .sbtn {
+	padding:0 0.5rem 0 0.5rem ;
+	border:1px solid black ;
+	background-color:white ;
+	color:black ;
+	font-family:"apple color emoji",sans-serif;
+}
+.oswitch input[id=pause] + .sbtn:before {
+	content: "STOP" ;
+}
+.oswitch input[id=pause]:checked + .sbtn:before {
+	content: "START" ;
+}
+.oswitch input[id=editor] + .sbtn:before {
+	content: "<" ;
+}
+.oswitch input[id=editor]:checked + .sbtn:before {
+	content: ">" ;
+}
+
+#footer {
+	position:absolute ;
+	top:calc(100% - 2rem) ;
+	color:#888 ;
+}
+
+#cursor {
+	position:absolute ;
+	pointer-events: none ;
+}
+</style>
+<body>
+<div class=view id=viewp>
+<div id=scene></div>
+<div id=cc>
+<label><input type=checkbox id=c_stats>stats</label>
+[<span id="fps"></span>]
+<span class=oswitch><label><input type=checkbox id=pause><span class=sbtn></span></label></span>
+<div id=pui></div>
+</div>
+<div id=footer></div>
+</div>
+<div id=infow>
+<div id=infoc>❌</div>
+	info
+</div>
+</body>
+
+	
