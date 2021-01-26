@@ -134,24 +134,7 @@ POXA.init = function() {
 		}	
 	})	
 }
-POXA.loadjson = function(path) {
-	return new Promise((resolve,reject) => {
-		const req = new XMLHttpRequest();
-		req.open("get",path+"?"+new Date().getTime(),true) ;
-		req.responseType = "json" ;
-		req.onload = () => {
-			if(req.status==200) {
-				resolve(req.response) ;
-			} else {
-				reject("Ajax error:"+req.statusText) ;
-			}
-		}
-		req.onerror = ()=> {
-			reject("Ajax error:"+req.statusText)
-		}
-		req.send() ;
-	})
-}
+
 POXA.load = async (path)=> {
 	let data = null 
 	const query = location.search.substr(1).split("&")
@@ -161,7 +144,7 @@ POXA.load = async (path)=> {
 	
 	if(url) {
 		try {
-			data = await POXA.loadjson(url)
+			data = await POXLS.load(url)
 		} catch(err) {
 			console.log(err)
 			return null 

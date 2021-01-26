@@ -5,6 +5,7 @@
 <title>afe view</title>
 <script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script>
 <script src="js/poxa.js"></script>
+<script src="js/ls.js"></script>
 <script src="js/WBind.js"></script>
 <script src="components/afecomponents.js"></script>
 <script src="https://unpkg.com/vanilla-picker@2"></script>
@@ -13,12 +14,12 @@ function $(o) {return document.getElementById(o)}
 onload=async function() {
 	POXA.init()
 	let data = await POXA.load()
-	if(data==null) data = await POXA.load("sample/template.json")
+	if(data==null) data = await POXLS.load("sample/template.json")
 	if(data) {
 		if(data.settings.import) await POXA.setimport(data.settings.import.split(","))
 		POXA.loadscene(data,{id:"main"})
 		document.title = "afe: "+data.settings.name
-	} 
+	}
 }
 
 </script>

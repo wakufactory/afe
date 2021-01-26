@@ -5,6 +5,7 @@
 <title>afe</title>
 <script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script>
 <script src="js/poxa.js"></script>
+<script src="js/ls.js"></script>
 <script src="js/WBind.js"></script>
 <script src="components/afecomponents.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js" crossorigin="anonymous"></script>
@@ -17,6 +18,7 @@ onload=async function() {
 	let data = await POXA.load()
 	if(data==null) data = await POXA.load("sample/template.json")
 	if(data) {
+		console.log(data)
 		POXE.seteditor(data)
 		if(data.settings.import) await POXA.setimport(data.settings.import.split(","))
 		POXA.loadscene(data,{id:"main"})
@@ -122,6 +124,9 @@ POXE.editor = async function() {
 	$("b_comma").addEventListener("click", (ev)=>{
 		curedit.insert(",")		
 	})
+	$("b_minus").addEventListener("click", (ev)=>{
+		curedit.insert("-")		
+	})
 	$("b_sp").addEventListener("click", (ev)=>{
 		curedit.insert(" ")		
 	})
@@ -201,7 +206,7 @@ POXE.addvcursor = function() {
 	})	
 }
 POXE.loadsnippets = async function() {
-	const s = await POXA.loadjson("./snippets.json")
+	const s = await POXLS.loadres("./snippets.json")
 	if(s['tags']) {
 		$('sn_tag').innerHTML += s.tags.map((v)=>{return `<option>${v.name}</option>`}).join("")
 	}
@@ -224,29 +229,15 @@ POXE.fsave = function() {
 		scenes:[POXE.e2.getValue()],
 		components:POXE.e3.getValue()
 	}
-
 	const f = data.settings.name
-	const oData = new FormData()
-	oData.append("fname", f)
-	oData.append("data",JSON.stringify(data))
-	var oReq = new XMLHttpRequest()
-	oReq.open("POST", "save/save.php", true)
-	oReq.responseType = "json" ;
-	oReq.onload = function(oEvent) {
-		if (oReq.status == 200) {
-			if(oReq.response && oReq.response.status==0) {
-				if(POXE.loadfile!=f) {
-					location.href = `?save/data/${f}.json`
-				}
-			} else {
-				alert("save error")
-			}
-		} else {
-			alert("save error")
+
+	POXLS.save(f,data).then(()=>{
+		if(POXE.loadfile!=f) {
+			location.href = `?save/data/${f}.json`
 		}
-	};
-	$("m_save").innerHTML = "" 
-	oReq.send(oData)
+	}).catch(err=> {
+		alert(err)
+	})
 }
 
 POXE.save = (data)=> {
@@ -577,7 +568,7 @@ label,button {
 <div class=edit id=editp>
 <div id=ec>
 <div style="display:flex">
-[AFEQ]<span id=info>i</span> scene:<span id=title></span>
+[AFEQ] scene:<span id=title></span>
 <div id=abtn>
 <a href="" id=l_save download="save.json"><button>Download</button></a>
 <label><input type=file id=l_load style="display:none"><button id=b_up>Upload</button></label>
@@ -648,6 +639,7 @@ label,button {
 <button id=b_equal>=</button>
 <button id=b_semic>;</button>
 <button id=b_comma>,</button>
+<button id=b_minus>-</button>
 <button id=b_sp>SP</button>
 <button id=b_bs>BS</button>
 <button id=b_ret>RET</button>
@@ -661,7 +653,7 @@ label,button {
 <div class=sep id=vsep></div>
 <div class=view id=viewp>
 <div id=scene></div>
-<div id=cc>
+<div id=cc><span id=info>i</span>
 <label><input type=checkbox id=c_stats>stats</label>
 [<span id="fps"></span>]
 <span class=oswitch><label><input type=checkbox id=pause><span class=sbtn></span></label></span>
