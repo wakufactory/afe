@@ -1,4 +1,4 @@
-const POXLS = {
+POXLS = {
 	load:function(path) {
 		return new Promise((resolve,reject) => {
 			const req = new XMLHttpRequest();

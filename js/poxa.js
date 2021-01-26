@@ -1,4 +1,4 @@
-const POXA = {
+POXA = {
 lskey:"afe.polygon.work",
 log:function(msg) {
 	if(window.POXE) POXE.log(msg)

@@ -26,9 +26,9 @@ onload=async function() {
 	} 
 }
 
-const POXE ={} 
+POXE ={} 
 POXE.log = function(msg,stack="") {
-	console.log(msg)
+	console.log("log:"+msg)
 	if( typeof msg == "string") {
 		let p = location.protocol + "//" + location.host
 	}
@@ -72,9 +72,6 @@ POXE.editor = async function() {
 	})
 	$("b_up").addEventListener("click", ()=>{
 		$("l_load").click()
-	})
-	$("l_load").addEventListener("change", (ev)=>{
-		console.log(ev.target.files)
 	})
 	POXE.addvcursor()
 
@@ -178,6 +175,7 @@ POXE.editor = async function() {
 	    curedit.insert(color.rgbaString)
     }
 	$('info').addEventListener("click", ev=>{
+		console.log("ck")
 		$('infow').style.display = "block";
 	})
 	$('infoc').addEventListener("click", ev=>{
@@ -366,7 +364,7 @@ div.edit textarea {
 	height:calc(100% - 6rem) ;
 }
 #abtn {
-	width:21rem ;
+	width:15rem ;
 	margin-left:auto;
 }
 #cc {
@@ -568,10 +566,8 @@ label,button {
 <div class=edit id=editp>
 <div id=ec>
 <div style="display:flex">
-[AFEQ] scene:<span id=title></span>
+[AFE] scene:<span id=title></span>
 <div id=abtn>
-<a href="" id=l_save download="save.json"><button>Download</button></a>
-<label><input type=file id=l_load style="display:none"><button id=b_up>Upload</button></label>
 <button id=b_save >SAVE</button><span id=m_save></span>
 <button id=b_apply style="margin-left:2rem">APPLY</button>
 </div>
