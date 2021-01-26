@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" /> 
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>afe list</title>
+<script>
+onload = function() {
+	var req = new XMLHttpRequest();
+	req.open("get","save/dir.php?dir=data",true) ;
+	req.responseType = "json" ;
+	req.onload = ()=> {
+		if(req.status==200) {
+			list(req.response) ;
+		} else {
+			console.log("Ajax error:"+req.statusText) ;					
+		}
+	}
+	req.onerror = ()=> {
+		console.log("Ajax error:"+req.statusText)
+	}
+	req.send() ;
+}
+function list(l) {
+	var r = [] ;
+	for(var i = l.length-1 ; i>=0 ;i--) {
+		r.push(`<li><span class=n>${l[i]['name']}</span><span class=t>${l[i]['mtime']}</span> <a href="./?save/data/${l[i]['name']}" target="_blank">EDIT</a> <a href="./view.html?save/data/${l[i]['name']}" target="_blank">VIEW</a>
+<a href="./tohtml.php?save/data/${l[i]['name']}" target="_blank">html</a>
+</li>`)
+	}
+	document.getElementById("list").innerHTML = r.join("\n") ;
+}
+</script>
+<style>
+* {
+	background-color:#222 ;
+	color:#fff ;
+}
+li:hover {
+	background-color:#eee ;
+}
+span.n {
+	display:inline-block ;
+	width:15rem ;
+}
+span.t {
+	display:inline-block ;
+	width:13rem ;
+}
+</style>
+<body>
+<ul id=list></ul>
+</body>
