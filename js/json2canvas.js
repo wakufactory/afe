@@ -5,7 +5,7 @@
 // property str,src ,rect,x,y,width,height 
 // styles radius,color,border,background,lineWidth,font,lineHeight,align,offsetx,offsety
 //
-export {json2canvas}
+
 class json2canvas {
 
 constructor(can) {
