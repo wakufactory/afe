@@ -45,6 +45,7 @@
 		{"name":"Matrix4","value":"THREE.Matrix4."}
 	],
 	"code":[
+		{"name":"this","value":"this."},
 		{"name":"const","value":"const "},
 		{"name":"let","value":"let "},
 		{"name":"new","value":"= new "},
@@ -58,7 +59,9 @@
 		{"name":"if","value":"if(){}","cback":3},
 		{"name":"else","value":"else{}","cback":1},
 		{"name":"ternary","value":"(( )? : )","cback":7},
-		{"name":"add component","value":"POXA.registerComponent('name',{\n\tinit:function() {\n\t},\n\tupdate:function() {\n\t},\n\ttick:function() {\n\t},\n})"},
+		{"name":"consolelog","value":"console.log()","cback":1},
+		{"name":"poxlog","value":"POXA.log()","cback":1},
+		{"name":"add component","value":"POXA.registerComponent('name',{\n\tinit:function() {\n\t},\n\tupdate:function(old) {\n\t},\n\ttick:function(time,dur) {\n\t},\n})"},
 		{"name":"add shader","value":"POXA.registerShader('name',{\n\tschema:{\n\t},\n\trow:false,\n\tvertexShader:`\n`,\n\tfragmentShader:`\n`\n})"}
 	]
 }

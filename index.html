@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width" /> 
-<title>afe</title>
+<title>afe : A-Frame Web Editor</title>
 <script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script>
 <script src="js/poxa.js"></script>
 <script src="js/ls.js"></script>
@@ -383,7 +383,7 @@ div.edit textarea {
 #info{
 	background:white;
 	margin:0 1rem 0 1rem ;
-	padding:0 0.6rem 0 0.6rem ;
+	padding:0 0.3rem 0 0.3rem ;
 	color:black ;
 	border:1px sold white ;
 	border-radius:8px ;
@@ -411,6 +411,9 @@ div.edit textarea {
 #scene {
 	width:100%;
 	height:100% ;
+}
+a-entity {
+	display:none ;
 }
 #pui {
 	margin-top:1rem ;
@@ -653,7 +656,7 @@ label,button {
 <div class=sep id=vsep></div>
 <div class=view id=viewp>
 <div id=scene></div>
-<div id=cc><span id=info>i</span>
+<div id=cc><span id=info>info</span>
 <label><input type=checkbox id=c_stats>stats</label>
 [<span id="fps"></span>]
 <span class=oswitch><label><input type=checkbox id=pause><span class=sbtn></span></label></span>
