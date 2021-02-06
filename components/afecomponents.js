@@ -34,9 +34,13 @@ AFRAME.registerComponent('padmove', {
 		gripud:{type:"boolean",default:false}
 	},
 	init:function() {
+		const data = this.data
 		let lastx = 0
 		let grip = 0  
-		this.el.addEventListener('thumbstickmoved',(ev)=>{
+		this.el.addEventListener('thumbstickmoved',stick)
+		this.el.addEventListener('trackpaddown',stick)
+		
+		function stick(ev){
 //			console.log(ev)
 			const stick = ev.detail
 			const pm = document.querySelector("[padmoved]")?.components.padmoved 
@@ -49,10 +53,10 @@ AFRAME.registerComponent('padmove', {
 					}
 				} else lastx = 0
 			} else {
-				if(this.data.gripud && grip) pm.ud(stick.y)
+				if(data.gripud && grip) pm.ud(stick.y)
 				else pm.move(stick.y)
 			}	
-		})	
+		}
 		this.el.addEventListener('gripchanged',(ev)=>{
 			grip = ev.detail.pressed
 		})
