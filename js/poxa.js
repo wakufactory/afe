@@ -139,8 +139,12 @@ POXA.load = async (path)=> {
 	let data = null 
 	const query = location.search.substr(1).split("&")
 	let url 
+	POXA.query = query 
 	if(path) url = path 
-	else if(query[0].match(/\.json$/)) url = query[0]
+	else if(query[0].match(/\.json$/)) {
+		url = query[0]
+		POXA.query = query.slice(1)
+	}
 	
 	if(url) {
 		try {
@@ -154,7 +158,6 @@ POXA.load = async (path)=> {
 		data = JSON.parse(localStorage.getItem(POXA.lskey+".scene"))
 		if(data) data = data[0]
 	}
-	if(query[1]) POXA.query = query.slice(1)
 	return data 
 }
 POXA.importScene = async function(path,attr) {
