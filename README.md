@@ -1,6 +1,7 @@
 # afe
 A-Frame editor
 
+usage slide : https://wakufactory.jp/wxr/ev/xRTech4/
 ## files
 
  - index.html -- editor
