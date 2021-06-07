@@ -1,6 +1,10 @@
 # afe
 A-Frame editor
 
+usage slide : https://wakufactory.jp/wxr/ev/xRTech4/
+
+demo page : https://polygon.work/afet/ 
+
 ## files
 
  - index.html -- editor
