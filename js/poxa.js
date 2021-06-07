@@ -40,7 +40,9 @@ initscene:function() {
 loadscene:function(data,attr) {
 	let ev 
 	try {
-		ev = new Function("POXA",''+data.components+'')
+		let src = data.components
+		if(data.shaders) src += data.shaders 
+		ev = new Function("POXA",''+src+'')
 	} catch(err) {
 		console.log("catch eval")
 		POXA.log(err,err.stack)
@@ -143,7 +145,7 @@ POXA.load = async (path)=> {
 	if(path) url = path 
 	else if(query[0].match(/\.json$/)) {
 		url = query[0]
-		POXA.query = query.slice(1)
+		POXA.query  = query.slice(1)
 	}
 	
 	if(url) {

@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width" /> 
 <title>afe : A-Frame Web Editor</title>
 <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-<script src="js/poxa.js"></script>
+<script src="js/poxa.js?20210301"></script>
 <script src="js/ls.js"></script>
 <script src="js/WBind.js"></script>
-<script src="components/afecomponents.js?20210201"></script>
+<script src="components/afecomponents.js?20210504"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/vanilla-picker@2"></script>
 <script >
@@ -189,6 +189,7 @@ POXE.seteditor = function(data) {
 	$('title').innerHTML = st.name 
 	POXE.e2.setValue(sc,-1)
 	POXE.e3.setValue(data.components,-1)
+	if(data.shaders) POXE.e4.setValue(data.shaders,-1)
 	POXE.e1.setValue(AFRAME.utils.styleParser.stringify(data.settings),-1)
 }
 POXE.addvcursor = function() {
@@ -226,7 +227,8 @@ POXE.fsave = function() {
 		version:1.0,
 		settings:AFRAME.utils.styleParser.parse(POXE.e1.getValue()),
 		scenes:[POXE.e2.getValue()],
-		components:POXE.e3.getValue()
+		components:POXE.e3.getValue(),
+		shaders:POXE.e4.getValue()
 	}
 	const f = data.settings.name
 
@@ -250,7 +252,8 @@ POXE.reload = ()=> {
 	const data = {
 		settings:AFRAME.utils.styleParser.parse(POXE.e1.getValue()),
 		scenes:[POXE.e2.getValue()],
-		components:POXE.e3.getValue()
+		components:POXE.e3.getValue(),
+		shaders:POXE.e4.getValue()
 	}
 	POXA.loadscene(data)
 	POXE.save(data) 
@@ -290,7 +293,7 @@ POXE.ace = ()=> {
 	POXE.e1 = setace("e1","ace/mode/text")
 	POXE.e2 = setace("e2","ace/mode/html")
 	POXE.e3 = setace("e3","ace/mode/typescript")
-	POXE.e4 = setace("e4","ace/mode/text")
+	POXE.e4 = setace("e4","ace/mode/typescript")
 }
 
 </script>
@@ -613,7 +616,7 @@ label,button {
   </li>
   <li>
   	<input name="tab" id="tab4" type="radio"  />
-	<label for="tab4" style="color:green">memo</label>
+	<label for="tab4">SHADERS</label>
 	<div class="contents tab4" id=e4></div>
   </li>
   <li>
