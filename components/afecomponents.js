@@ -64,34 +64,51 @@ AFRAME.registerComponent('padmove', {
 })
 // touch movee
 AFRAME.registerComponent('padmoved', {
+	schema: {
+		movev:{default:2},
+		dirlock:{default:true},
+		fly:{default:false}
+	},
 	init:function() {
 	  this.rot = {x:0,y:0,z:0}
+		this.cdir = {x:0,y:0,z:0}
 	  this.velocity = 0
 	  this.mode = 0
+	  this.camobj = AFRAME.scenes[0].camera.el.object3D
+	  this.el.addEventListener('updown',(ev)=>{
+		  this.ud(ev.detail.dir)
+		})
 	},
 	rotate:function(dir) {
-		console.log("rot ")
 		this.rot.y += THREE.Math.degToRad( (dir>0)?-30:30 ) ;
 		this.el.object3D.rotation.set(this.rot.x,this.rot.y,this.rot.z)
 	},
 	move:function(dir) {
-		this.velocity = 0.1 * dir
+		if(this.velocity==0 && Math.abs(dir)>0) {
+			if(this.data.fly) this.cdir.y = Math.sin(-this.camobj.rotation.x)
+			this.cdir.z = Math.cos(this.camobj.rotation.y+this.rot.y)
+			this.cdir.x = Math.sin(this.camobj.rotation.y+this.rot.y)
+		}
+		this.velocity = this.data.movev * dir/1000
 		this.mode = 0
 	},
 	ud:function(dir) {
-		this.velocity = 0.1 * -dir
+		this.velocity = this.data.movev * -dir/1000
 		this.mode = 1 
 	},
 	tick:function(time, timeDelta) {
-		const cdir = new THREE.Vector3()
-		document.getElementById("camera").object3D.getWorldDirection(cdir)
-		const dx = this.mode==0?(cdir.x * this.velocity):0
-		const dz = this.mode==0?(cdir.z * this.velocity):0
-		const dy = this.mode==1?(this.velocity*0.5):0
+		const vv = this.velocity *timeDelta
+		if(!this.data.dirlock) {
+			if(this.data.fly) this.cdir.y = Math.sin(-this.camobj.rotation.x)
+			this.cdir.z = Math.cos(this.camobj.rotation.y+this.rot.y)
+			this.cdir.x = Math.sin(this.camobj.rotation.y+this.rot.y)
+		}
+		const dx = this.mode==0?(this.cdir.x * vv):0
+		const dz = this.mode==0?(this.cdir.z * vv):0
+		const dy = this.mode==1?(vv*0.5):this.cdir.y * vv
 		this.el.object3D.position.add({x:dx,y:dy,z:dz})		
 	}
-})
-// matrix transform
+})// matrix transform
 AFRAME.registerComponent('matrix4', {
 	schema:{
 		mat:{default:[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,0]}
