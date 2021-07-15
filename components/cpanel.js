@@ -9,7 +9,8 @@ AFRAME.registerComponent('cpanel',{
 		font:{default:"40px monospace"},
 		color:{default:"#222"},
 		clearColor:{default:"#fff0"},
-		lheight:{default:40}
+		lheight:{default:40},
+		margin:{type:"vec2",default:{'x':0,'y':0}}
 	},
 	init:function() {
 		const elg = this.el.components.geometry.data
@@ -25,9 +26,10 @@ AFRAME.registerComponent('cpanel',{
 		this.clearColor = data.clearColor 
 		this.ctx = this.j2c.ctx
 		this.dd = []
-		let y = data.lheight 
+		let y = data.lheight + data.margin.y 
+		let w = this.pcanvas.width - data.margin.x * 2 
 		for(let i=0;i<data.lines;i++,y+=data.lheight) 
-			this.dd.push({shape:"text",str:"",x:0,y:y,width:this.pcanvas.width})
+			this.dd.push({shape:"text",str:"",x:data.margin.x,y:y,width:w})
 		this.j2c.draw(this.dd)
 		this.el.setAttribute("material","src",this.pcanvas)
 	},

@@ -31,7 +31,8 @@ AFRAME.registerComponent('vrheight', {
 // oclusTouch mover
 AFRAME.registerComponent('padmove', {
 	schema:{
-		gripud:{type:"boolean",default:false}
+		gripud:{type:"boolean",default:false},
+		gripfly:{type:"boolean",default:false}
 	},
 	init:function() {
 		const data = this.data
@@ -56,9 +57,11 @@ AFRAME.registerComponent('padmove', {
 				if(data.gripud && grip) pm.ud(stick.y)
 				else pm.move(stick.y)
 			}	
+			if(data.gripfly) pm.data.fly = grip 
 		}
 		this.el.addEventListener('gripchanged',(ev)=>{
 			grip = ev.detail.pressed
+			
 		})
 	}
 })
@@ -99,7 +102,7 @@ AFRAME.registerComponent('padmoved', {
 	tick:function(time, timeDelta) {
 		const vv = this.velocity *timeDelta
 		if(!this.data.dirlock) {
-			if(this.data.fly) this.cdir.y = Math.sin(-this.camobj.rotation.x)
+			this.cdir.y = (this.data.fly)?Math.sin(-this.camobj.rotation.x):0
 			this.cdir.z = Math.cos(this.camobj.rotation.y+this.rot.y)
 			this.cdir.x = Math.sin(this.camobj.rotation.y+this.rot.y)
 		}

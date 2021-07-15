@@ -205,6 +205,7 @@ POXA.setUIproperty = function(comp,prop,cb=null) {
 		tag.className = "b"
 		tag.innerHTML = `<div class=t>${name}</div> <input type=${p.type} id="_p_${cname}_${i}" ${size} min=0 max=${p.step} style="${(p.type=="disp")?"display:none":""}"  /><div class=v id=${"_p_d_"+cname+"_"+i}></div>`
 		dom.appendChild(tag)
+		p.dom = tag 
 	}
 	function _tohex(v) {
 		let s = (v*255).toString(16) ;
@@ -224,6 +225,14 @@ POXA.setUIproperty = function(comp,prop,cb=null) {
 	}
 	for(let i in prop) {
 		let p = prop[i]
+		if(p.type=="button") {
+			p.dom.addEventListener("mousedown", ev=>{
+				if(cb) cb({key:i,value:1})
+			})
+			p.dom.addEventListener("mouseup", ev=>{
+				if(cb) cb({key:i,value:0})
+			})
+		}
 		POXA.uprop.bindInput(i,"#_p_"+cname+"_"+i)
 		POXA.uprop.setFunc(i,{
 			set:(v)=> {
@@ -251,6 +260,7 @@ POXA.setUIproperty = function(comp,prop,cb=null) {
 				return ret ;
 			},
 			input:(v)=>{
+				if(p.type="button") return 
 				_setdisp(i,POXA.uprop[i])
 //				this.keyElelment.focus()
 //				this.callEvent("prop",{key:i,value:v})
