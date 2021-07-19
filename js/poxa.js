@@ -260,7 +260,7 @@ POXA.setUIproperty = function(comp,prop,cb=null) {
 				return ret ;
 			},
 			input:(v)=>{
-				if(p.type="button") return 
+				if(p.type=="button") return 
 				_setdisp(i,POXA.uprop[i])
 //				this.keyElelment.focus()
 //				this.callEvent("prop",{key:i,value:v})
