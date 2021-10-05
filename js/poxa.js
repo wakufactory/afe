@@ -198,12 +198,13 @@ POXA.setUIproperty = function(comp,prop,cb=null) {
 		const p = prop[i] ;
 		const name = (p.name)?p.name:i ;
 		let size = ""
+		let acc = p.accept?`accept=${p.accept}`:""
 		if(!p.type) p.type = "range" 
 		if(!p.step) p.step = 100 ;
 		if(p.size) size = "size="+p.size
 		tag = document.createElement("div")
 		tag.className = "b"
-		tag.innerHTML = `<div class=t>${name}</div> <input type=${p.type} id="_p_${cname}_${i}" ${size} min=0 max=${p.step} style="${(p.type=="disp")?"display:none":""}"  /><div class=v id=${"_p_d_"+cname+"_"+i}></div>`
+		tag.innerHTML = `<div class=t>${name}</div> <input type=${p.type} id="_p_${cname}_${i}" ${size} min=0 max=${p.step} style="${(p.type=="disp")?"display:none":""}" ${acc} /><div class=v id=${"_p_d_"+cname+"_"+i}></div>`
 		dom.appendChild(tag)
 		p.dom = tag 
 	}
