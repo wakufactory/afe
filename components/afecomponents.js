@@ -32,7 +32,9 @@ AFRAME.registerComponent('vrheight', {
 AFRAME.registerComponent('padmove', {
 	schema:{
 		gripud:{type:"boolean",default:false},
-		gripfly:{type:"boolean",default:false}
+		gripfly:{type:"boolean",default:false},
+		move:{type:"boolean",default:true},
+		turn:{type:"boolean",default:true}
 	},
 	init:function() {
 		const data = this.data
@@ -46,22 +48,26 @@ AFRAME.registerComponent('padmove', {
 			const stick = ev.detail
 			const pm = document.querySelector("[padmoved]")?.components.padmoved 
 			if(!pm) return 
-			if(Math.abs(stick.x)>Math.abs(stick.y)) {
+			if(data.turn && Math.abs(stick.x)>Math.abs(stick.y)) {
 				if(Math.abs(stick.x)>0.6){
 					if(lastx == 0) {
 						lastx = 1
 						pm.rotate(stick.x)
 					}
 				} else lastx = 0
-			} else {
-				if(data.gripud && grip) pm.ud(stick.y)
-				else pm.move(stick.y)
-			}	
+			}
+			if(data.gripud) {
+				if(grip && Math.abs(stick.x)<Math.abs(stick.y)) pm.ud(stick.y)
+				else pm.ud(0)
+			}
+			if(data.move && !(data.gripud && grip)) {
+				if(data.turn) pm.move({x:0,y:stick.y})
+				else pm.move({x:stick.x,y:stick.y})
+			}
 			if(data.gripfly) pm.data.fly = grip 
 		}
 		this.el.addEventListener('gripchanged',(ev)=>{
 			grip = ev.detail.pressed
-			
 		})
 	}
 })
@@ -75,6 +81,7 @@ AFRAME.registerComponent('padmoved', {
 	init:function() {
 	  this.rot = {x:0,y:0,z:0}
 		this.cdir = {x:0,y:0,z:0}
+		this.pdir = {x:0,y:0}
 	  this.velocity = 0
 	  this.mode = 0
 	  this.camobj = AFRAME.scenes[0].camera.el.object3D
@@ -87,13 +94,24 @@ AFRAME.registerComponent('padmoved', {
 		this.el.object3D.rotation.set(this.rot.x,this.rot.y,this.rot.z)
 	},
 	move:function(dir) {
-		if(this.velocity==0 && Math.abs(dir)>0) {
-			if(this.data.fly) this.cdir.y = Math.sin(-this.camobj.rotation.x)
-			this.cdir.z = Math.cos(this.camobj.rotation.y+this.rot.y)
-			this.cdir.x = Math.sin(this.camobj.rotation.y+this.rot.y)
+		this.pdir = dir
+		const vl = Math.hypot(dir.x,dir.y)
+		if(this.velocity==0 && Math.abs(vl)>0) {
+			this.calccdir(dir)
 		}
-		this.velocity = this.data.movev * dir/1000
+		this.velocity = this.data.movev * vl/1000
 		this.mode = 0
+	},
+	calccdir:function(dir) {
+		const d = Math.atan2(dir.x,dir.y)
+		let dx,dy,dz
+		dy=0
+		if(this.data.fly) dy = Math.sin(-this.camobj.rotation.x)
+		dz = Math.cos(this.camobj.rotation.y+this.rot.y)
+		dx = Math.sin(this.camobj.rotation.y+this.rot.y)
+		this.cdir.y = Math.sign(dir.y)*dy
+		this.cdir.x = Math.cos(d)*dx+Math.sin(d)*dz
+		this.cdir.z =-Math.sin(d)*dx+Math.cos(d)*dz
 	},
 	ud:function(dir) {
 		this.velocity = this.data.movev * -dir/1000
@@ -102,9 +120,7 @@ AFRAME.registerComponent('padmoved', {
 	tick:function(time, timeDelta) {
 		const vv = this.velocity *timeDelta
 		if(!this.data.dirlock) {
-			this.cdir.y = (this.data.fly)?Math.sin(-this.camobj.rotation.x):0
-			this.cdir.z = Math.cos(this.camobj.rotation.y+this.rot.y)
-			this.cdir.x = Math.sin(this.camobj.rotation.y+this.rot.y)
+			this.calccdir(this.pdir)
 		}
 		const dx = this.mode==0?(this.cdir.x * vv):0
 		const dz = this.mode==0?(this.cdir.z * vv):0
