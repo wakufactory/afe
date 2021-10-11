@@ -204,7 +204,16 @@ POXA.setUIproperty = function(comp,prop,cb=null) {
 		if(p.size) size = "size="+p.size
 		tag = document.createElement("div")
 		tag.className = "b"
-		tag.innerHTML = `<div class=t>${name}</div> <input type=${p.type} id="_p_${cname}_${i}" ${size} min=0 max=${p.step} style="${(p.type=="disp")?"display:none":""}" ${acc} /><div class=v id=${"_p_d_"+cname+"_"+i}></div>`
+		if(p.type=="select") {
+			let t = `<div class=t>${name}</div><select id="_p_${cname}_${i}">`
+			for(let s of p.select) {
+				let sel = (p.value && s.value==p.value)?"selected":""
+				t += `<option value="${s.value}" ${sel}>${s.name}</option>`
+			}
+			tag.innerHTML = t+`</select>`
+		} else {
+			tag.innerHTML = `<div class=t>${name}</div> <input type=${p.type} id="_p_${cname}_${i}" ${size} min=0 max=${p.step} style="${(p.type=="disp")?"display:none":""}" ${acc} /><div class=v id=${"_p_d_"+cname+"_"+i}></div>`
+		}
 		dom.appendChild(tag)
 		p.dom = tag 
 	}
@@ -214,7 +223,7 @@ POXA.setUIproperty = function(comp,prop,cb=null) {
 		return s ;
 	}
 	function _setdisp(i,v) {
-		if(v===undefined || prop[i].type=="file"|| prop[i].type=="text"|| prop[i].type=="button") return 
+		if(v===undefined || prop[i].type=="file"|| prop[i].type=="text"|| prop[i].type=="button"|| prop[i].type=="select") return 
 		const dobj = document.getElementById(`_p_d_${cname}_`+i)
 		if(prop[i].type=="color" && v ) {
 			dobj.innerHTML = v.map((v)=>v.toString().substr(0,5)) ;
