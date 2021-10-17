@@ -3,7 +3,7 @@
 		{"name":"a-entity","value":"<a-entity ></a-entity>\n","cback":13},
 		{"name":"a-mixin","value":"<a-mixin id=\"\" ></a-mixin>\n","cback":14},
 
-		{"name":"a-box","value":"<a-box scale=\"1 1 1\" rotate=\"0 0 0\" position=\"0 0 0\" ></a-box>\n"},
+		{"name":"a-box","value":"<a-box scale=\"1 1 1\" rotation=\"0 0 0\" position=\"0 0 0\" ></a-box>\n"},
 		{"name":"a-sphere","value":"<a-sphere radius=\"1\" position=\"0 0 0\" ></a-sphere>\n"},
 		{"name":"a-cylinder","value":"<a-cylinder height=\"1\" radius=\"1\" position=\"0 0 0\" ></a-cylinder>\n"},
 		{"name":"a-plane","value":"<a-plane width=\"1\" height=\"1\" position=\"0 0 0\" ></a-plane>\n"},
@@ -45,10 +45,8 @@
 		{"name":"Matrix4","value":"THREE.Matrix4."}
 	],
 	"code":[
-		{"name":"this","value":"this."},
-		{"name":"const","value":"const "},
-		{"name":"let","value":"let "},
-		{"name":"new","value":"= new "},
+		{"name":"vec3(xyz)","value":"{x:,y:,z:}","cback":7},
+		{"name":"vec2(uv)","value":"{u:,v:}","cback":4},
 		{"name":"function","value":"function(){}\n","cback":2},
 		{"name":"closure","value":"()=>{}\n","cback":2},
 		{"name":"promise","value":"new Promise((resolve,reject)=>{})\n","cback":3},
@@ -61,7 +59,18 @@
 		{"name":"ternary","value":"(( )? : )","cback":7},
 		{"name":"consolelog","value":"console.log()","cback":1},
 		{"name":"poxlog","value":"POXA.log()","cback":1},
-		{"name":"add component","value":"POXA.registerComponent('name',{\n\tinit:function() {\n\t},\n\tupdate:function(old) {\n\t},\n\ttick:function(time,dur) {\n\t},\n})"},
+		{"name":"add component","value":"POXA.registerComponent('name',{\n\tinit:function() {\n\t},\n\tupdate:function(old) {\n\t},\n\ttick:function(time,dur) {\n\t},\n})\n"},
 		{"name":"add shader","value":"POXA.registerShader('name',{\n\tschema:{\n\t},\n\trow:false,\n\tvertexShader:`\n`,\n\tfragmentShader:`\n`\n})"}
-	]
+	],
+	"dict":{
+		"jyoyaku":["break","case ","catch()","class ","const ","continue","debugger","default","delete","do","else ","export","extends","for()","function ","if()","import ","in","instanceof ","new ","return ","super","switch()","this.","throw","try","typeof ","var ","void","while()","with","yield","implements","let ","package","static","await ","async ","null","true","false","undefined","finally","constructor()"],
+		"math":["Math.","Math.PI", "Math.floor()","Math.abs()","Math.sign()","Math.max()","Math.min()","Math.random()","Math.sin()","Math.cos()","Math.atan2()","Math.sqrt()","Math.pow()","Math.exp()","Math.log()","Math.hypot()"],
+		"word":[
+			"position","rotation","scale","color","time","components","data","material","uniform","texture","default"],
+		"prop":["AFRAME.","POXA.","THREE.",".objct3D",".value",".id","document."],
+		"method":[".setAttribute()",".addEventListener()",".getObject3D()",".emit()",".querySelector()",".querySelectorAll()",".appendChild()",".createElement()"],
+		"tag":["<!-- -->","<a-entity>","<a-assets>","<img src=\"\" id=\"\" />","<a-box>","<a-plane>"],
+		"aprop":["position=\"\"","rotation=\"\"","scale=\"\"","color=\"\"","height=\"\"","radius=\"\"","width=\"\"","mixin=\"\"","transparent","segment-","true","false","flat","standard"],
+		"gyoyaku":["in ","out ","varying ","uniform ","vec2 ","vec3 ","vec4 ","float ","int ","gl_Positon","gl_FragColor","timestamp","discard","sin()","cos()","atan()","flact()","floor()","mod()","exp()","mix()","dot()","cross()","step()","smoothstep()","modelViewMatrix","projectionMatrix","viewMatrix","normalMatrix","cameraPosition","position","normal"]
+	}
 }

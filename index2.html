@@ -26,6 +26,26 @@ onload=async function() {
 		POXA.loadscene(data,{id:"main"})
 		document.title = "afe: "+data.settings.name
 	} 
+	
+	$('b_kclose').addEventListener("click", ev=>{
+		if($('kbd').style.height=="2rem") {
+			$('kbd').style.height = "12rem" ;
+			$('main').style.height = "calc(100% - 12rem)" ;
+			ev.target.innerHTML = "⬇︎"
+			POXE.e2.resize(true)
+			POXE.e3.resize(true)
+			POXE.e4.resize(true)
+			POXE.e5.resize(true)
+		} else {
+			$('kbd').style.height = "2rem" ;
+			$('main').style.height = "calc(100% - 2rem)" ;
+			ev.target.innerHTML = "⬆︎"
+			POXE.e2.resize(true)
+			POXE.e3.resize(true)
+			POXE.e4.resize(true)
+			POXE.e5.resize(true)
+		}
+	})
 }
 
 POXE ={} 
@@ -45,26 +65,42 @@ POXE.log = function(msg,stack="") {
 	$("msgc").innerHTML = msg.toString().substring(0,80) ;
 	$("msg").scrollTop = $("msgc").offsetHeight ;
 }
+
 POXE.editor = async function() {
 	window.onerror = function(msg, url, line, col, error) {  
-	    console.log(`${msg} lines:${line}-${col}`); 
+	    POXE.log(`${msg} lines:${line}-${col}`); 
 	};
 	POXE.ace() ;		//editor init	
 	let curedit = POXE.e2
+	
+	const sn = await POXE.loadsnippets()
+	const mwords = sn.dict
+	const kbd = new editorkey($('kbd'))
+	kbd.seteditor(curedit,{"tag":mwords['tag'],"aprop":mwords['aprop']})
 	document.querySelectorAll("input[name=tab]").forEach(o=>{
 		o.addEventListener("change", ev=>{
 			const id = ev.target.id
+			let words = {} 
 			switch(id) {
 				case "tab1": curedit = POXE.e1 ; break ;
-				case "tab2": curedit = POXE.e2 ; break ;
-				case "tab3": curedit = POXE.e3 ; break ;
-				case "tab4": curedit = POXE.e4 ; break ;
-				case "tab5": curedit = POXE.e5 ; break ;
+				case "tab2": 
+					words = {"tag":mwords['tag'],"aprop":mwords['aprop']}
+					curedit = POXE.e2 ; break ;
+				case "tab3": 
+					words = {"jyoyaku":mwords['jyoyaku'],"word":mwords['word'],"prop":mwords['prop'],"method":mwords['method'],"math":mwords['math']}
+					curedit = POXE.e3 ; break ;
+				case "tab4": 
+					words = {"gyoyaku":mwords['gyoyaku'],"word":mwords['word']}
+					curedit = POXE.e4 ; break ;
+				case "tab5": 
+					words = mwords 
+					curedit = POXE.e5 ; break ;
 			}
-			$('sn_tag').style.display=(id=="tab2"||id=="tab4")?"inline":"none"
-			$('sn_comp').style.display=(id=="tab2"||id=="tab4")?"inline":"none"
-			$('sn_code').style.display=(id=="tab3"||id=="tab4")?"inline":"none"
-			$('sn_kw').style.display=(id=="tab3"||id=="tab4")?"inline":"none"
+			kbd.seteditor(curedit,words)
+//			$('sn_tag').style.display=(id=="tab2"||id=="tab4")?"inline":"none"
+//			$('sn_comp').style.display=(id=="tab2"||id=="tab4")?"inline":"none"
+//			$('sn_code').style.display=(id=="tab3"||id=="tab4")?"inline":"none"
+//			$('sn_kw').style.display=(id=="tab3"||id=="tab4")?"inline":"none"
 		})
 	})
 	$("b_apply").addEventListener("click", ()=>{
@@ -73,85 +109,7 @@ POXE.editor = async function() {
 	$("b_save").addEventListener("click", ()=>{
 		POXE.fsave()
 	})
-	$("b_up").addEventListener("click", ()=>{
-		$("l_load").click()
-	})
-	POXE.addvcursor()
 
-	function getcbuf(){return localStorage.getItem(POXA.lskey+".clip")}
-	function setcbuf(text){return localStorage.setItem(POXA.lskey+".clip",text)}
-	$("b_selline").addEventListener("click", (ev)=>{
-		curedit.getSelection().selectLine()
-	})
-	$("b_copy").addEventListener("click", (ev)=>{
-		setcbuf(curedit.getCopyText())
-	})
-	$("b_cut").addEventListener("click", (ev)=>{
-		setcbuf(curedit.getCopyText())
-		curedit.insert("")		
-	})
-	$("b_paste").addEventListener("click", (ev)=>{
-		curedit.insert(getcbuf())	
-	})
-	$("b_undo").addEventListener("click", (ev)=>{
-		curedit.undo()	
-	})
-	$("b_tab").addEventListener("click", (ev)=>{
-		curedit.insert("\t")		
-	})
-	$("b_kakko").addEventListener("click", (ev)=>{
-		curedit.insert("()")	
-		curedit.navigateLeft(1)		
-	})
-	$("b_bracke").addEventListener("click", (ev)=>{
-		curedit.insert("[]")	
-		curedit.navigateLeft(1)		
-	})
-	$("b_brace").addEventListener("click", (ev)=>{
-		curedit.insert("{}")	
-		curedit.navigateLeft(1)		
-	})
-	$("b_quot").addEventListener("click", (ev)=>{
-		curedit.insert("\"\"")
-		curedit.navigateLeft(1)			
-	})
-	$("b_equal").addEventListener("click", (ev)=>{
-		curedit.insert("=")		
-	})
-	$("b_semic").addEventListener("click", (ev)=>{
-		curedit.insert(";")		
-	})
-	$("b_comma").addEventListener("click", (ev)=>{
-		curedit.insert(",")		
-	})
-	$("b_minus").addEventListener("click", (ev)=>{
-		curedit.insert("-")		
-	})
-	$("b_sp").addEventListener("click", (ev)=>{
-		curedit.insert(" ")		
-	})
-	$("b_bs").addEventListener("click", (ev)=>{
-		const c = curedit.getCursorPosition()
-		const sel = curedit.getCopyText()
-		if(sel=="") curedit.selection.addRange(new ace.Range( c.row, c.column, (c.column>0)?c.row:c.row-1,(c.column>0)?c.column-1:999))
-		curedit.insert("")
-	})
-	$("b_ret").addEventListener("click", (ev)=>{
-		curedit.insert("\n")		
-	})
-	$("b_left").addEventListener("click", (ev)=>{
-		curedit.navigateLeft()	
-	})
-	$("b_right").addEventListener("click", (ev)=>{
-		curedit.navigateRight()	
-	})
-	$("b_up").addEventListener("click", (ev)=>{
-		curedit.navigateUp()	
-	})
-	$("b_down").addEventListener("click", (ev)=>{
-		curedit.navigateDown()	
-	})
-	const sn = await POXE.loadsnippets()
 	function setsni(ev,list) {
 		if(ev.target.value=="") return ;
 		const s = list.find(v=>v.name==ev.target.value)
@@ -169,14 +127,7 @@ POXE.editor = async function() {
 	$("sn_code").addEventListener("change", (ev)=>{
 		setsni(ev,sn.code)
 	})
-	$("sn_kw").addEventListener("change", (ev)=>{
-		setsni(ev,sn.keyword)
-	})
-    const picker = new Picker($('b_col'))
-    picker.onDone = (color)=>{
-	    console.log(color)
-	    curedit.insert(color.rgbaString)
-    }
+
 	$('info').addEventListener("click", ev=>{
 		console.log("ck")
 		$('infow').style.display = "block";
@@ -218,9 +169,6 @@ POXE.loadsnippets = async function() {
 	}
 	if(s['code']) {
 		$('sn_code').innerHTML += s.code.map((v)=>{return `<option>${v.name}</option>`}).join("")
-	}
-	if(s['keyword']) {
-		$('sn_kw').innerHTML += s.keyword.map((v)=>{return `<option>${v.name}</option>`}).join("")
 	}
 	return s
 }
@@ -301,7 +249,122 @@ POXE.ace = ()=> {
 	POXE.e4 = setace("e4","ace/mode/glsl")
 	POXE.e5 = setace("e5","ace/mode/text")
 }
+class editorkey {
+	constructor(base) {
+		this.lskey = "vreditor_t1"
+		this.base = base 
+		this.kouho = base.querySelector("div.kouho")
 
+		let sf = false ;
+		this.sy = "" 
+		this.buttons = this.base.querySelectorAll("button")
+		this.buttons.forEach(o=>{
+			o.addEventListener("click", ev=>{
+				const e1 = this.editor 
+				const k = ev.target.id.substr(2)
+				let syk = "" 
+				if(k=="shift"){ 
+					sf = true
+					this.buttons.forEach(o=>{
+						if(o.innerHTML.match(/^[a-z]$/)) o.innerHTML = o.innerHTML.toUpperCase()
+					})
+					return
+				}
+				else if(k.match(/n[0-9]/)) e1.insert(k.substr(1))
+				else {
+					let ch = ev.target.innerHTML
+					if(k=="lt") ch ="<"
+					if(k=="gt") ch =">"
+					switch(k) {
+						case "copy":this.setcbuf(e1.getCopyText());break
+						case "cut":this.setcbuf(e1.getCopyText());e1.insert("");break
+						case "paste":e1.insert(this.getcbuf());break 
+						case "undo":e1.undo();break
+						case "bs":
+							const c = e1.getCursorPosition()
+							const sel = e1.getCopyText()
+							if(sel=="") e1.selection.addRange(new ace.Range( c.row, c.column, (c.column>0)?c.row:c.row-1,(c.column>0)?c.column-1:999))
+							e1.insert("")
+							break
+						case "ret": e1.insert("\n");break
+						case "tab":e1.insert("\t");break
+						case "spc":e1.insert(" ");break 
+						case "amp":e1.insert("&");break 
+						case "func":e1.insert("=>");break 
+						case "cl":e1.navigateLeft()	;break
+						case "cr":e1.navigateRight();break
+						case "cu":e1.navigateUp()	;break 
+						case "cd": e1.navigateDown();break
+						case "dqu":e1.insert("\"\"");e1.navigateLeft(1);break
+						case "quo":e1.insert("''");e1.navigateLeft(1);break 
+						case "bqu":e1.insert("``");e1.navigateLeft(1);break 
+						case "brake":e1.insert("[]");e1.navigateLeft(1);break 
+						case "brace":e1.insert("{}");e1.navigateLeft(1);break 
+						case "kakko":e1.insert("()");e1.navigateLeft(1);break 
+						default:
+							if(ch.match(/^[A-Z]{1}$/)){
+								if(!sf) ch = ch.toLowerCase() 
+							}
+							if(ch.match(/[\<\.]/i)) {
+								this.sy = "" 
+							}
+							if(ch.match(/[a-z\<\.]/i)) {
+								syk = ch 						
+							}
+							e1.insert(ch)
+					}
+				}
+				if(syk!="") {
+					this.sy = this.sy+syk 
+					this.hokan(this.sy)
+				} else {
+					this.sy = "" 
+					this.kouho.innerHTML = ""
+				}
+				sf = false 
+				this.buttons.forEach(o=>{
+					if(o.innerHTML.match(/^[A-Z]$/)) o.innerHTML = o.innerHTML.toLowerCase()
+				})
+			})
+		})
+	}
+	seteditor(editor,words) {
+		this.editor = editor
+		this.words = words 
+		this.sy = "" 
+	}
+	getcbuf(){return localStorage.getItem(this.lskey+".clip")}
+	setcbuf(text){return localStorage.setItem(this.lskey+".clip",text)}
+	hokan(yo) {
+		const y = []
+		for(let c in this.words) {
+			const k = this.words[c]
+			for(let i=0;i<k.length;i++) {
+				if(k[i].indexOf(yo)===0) y.push(k[i])
+			}
+		}
+//		console.log(y)
+		this.kouho.innerHTML = y.reduce((a,o)=>{
+				return a+"<span>"+o.replace("<","&lt;").replace(">","&gt;")+"</span>" 
+ 			},"")
+		this.kouho.querySelectorAll("span").forEach(o=>{
+			o.addEventListener("click", ev=>{
+				let text = ev.target.innerHTML.replace("&lt;","<").replace("&gt;",">")
+				let ins = text.substr(yo.length)
+				this.editor.insert(ins)
+				const last = text.substr(-1,1)
+				if(last==")"||last=="}"||last=="\"") this.editor.navigateLeft(1)
+				if(last==">" && text.substr(-2,1)!="/") {
+					this.editor.insert(text.replace("<","</"))
+					this.editor.navigateLeft(text.length+1)
+				}	
+				this.sy = ""
+				this.kouho.innerHTML = ""
+			})
+		})
+		return y 
+	}	
+}
 </script>
 <style>
 body,html {
@@ -311,9 +374,9 @@ body,html {
 	font-size:12px ;
 }
 body {
-	display:flex ;
 	box-sizing: border-box ;
 	font-family:sans-serif ;
+	background-color:black ;
 }
 button {
 	font-size:0.8rem ;
@@ -321,6 +384,13 @@ button {
 }
 a,a:visited {
 	color:#f44 ;
+}
+#main {
+	display:flex ;
+	height:calc(100% - 12rem) ;	
+}
+#kbd {
+	height:10rem ;
 }
 div.edit {
 	display:flex ;
@@ -374,7 +444,7 @@ div.edit textarea {
 }
 
 #ebox {
-	height:calc(100% - 6rem) ;
+	height:calc(100% - 4rem) ;
 }
 #abtn {
 	width:15rem ;
@@ -451,14 +521,14 @@ a-entity {
 	overflow:hidden ;
 }
 #ec {
-	height:3.5rem ;
+	height:2rem ;
 	color:#eee ;
 }
 #ec a {
 	color:#eee ;	
 }
 #ecd {
-	min-height:3rem ;
+	min-height:1rem ;
 }
 #msg {
 	height:2rem ;
@@ -581,8 +651,72 @@ label,button {
 .ace-tomorrow-night .ace_marker-layer .ace_selection {
     background: #596a84;
 }
+#bmenu {
+	width:2rem ;
+}
+#bottom {
+	display:flex;
+}
+#kbd {
+	display:block ;
+	overflow:hidden;
+	height:12rem ;
+	color:white ;
+}
+#kbd button {
+	width:2.6rem ;
+	height:2.6rem ;
+	font-size:1.6rem ;
+	margin-right:0.1rem ;
+	margin-left:0.1rem ;
+	vertical-align: middle ;
+	user-select: none;
+	background-color:#444 ;
+	color:white;
+	font-weight:normal;
+}
+#kbd button:hover {
+	background-color:#888 ;
+}
+#kbd button.ctrl {
+	color:red ;
+	font-size:1.3rem;
+}
+#kbd button.edit {
+	width:4.5rem ;
+	margin-left:1rem; 
+	font-size:1.0rem;
+}
+#kbd div.kouho {
+	color:white;
+	font-size : 1rem ;
+	height:1.4rem;
+	border:1px solid silver ;
+}
+#kbd div.kouho span {
+	display:inline-block ;
+	margin-left:0.5rem ;
+	margin-right:0.5rem ;
+	cursor:pointer ;
+}
+#kbd div.kouho span:hover {
+	background-color:#448;
+}
+#kbd div.kbmain {
+	display:flex ;
+}
+#kbd div.snip {
+	margin-left:2rem ;
+}
+button.curs {
+	color:#88f ;
+}
+div.snip select {
+	margin-bottom:1rem ;
+}
 </style>
 <body>
+<div id=main>
 <div class=edit id=editp>
 <div id=ec>
 <div style="display:flex">
@@ -592,13 +726,6 @@ label,button {
 <button id=b_apply style="margin-left:2rem">APPLY</button>
 </div>
 </div>
-<button id=b_selline title="select line">SelLine</button>
-<button id=b_cut>CUT</button>
-<button id=b_copy>COPY</button>
-<button id=b_paste>PASTE</button>
-<button id=b_undo>UNDO</button>
-&nbsp;&nbsp;
-<button id=b_col>COLOR</button>
 </div>
 <div id=ebox>
 <ul class=tabs>
@@ -636,38 +763,6 @@ label,button {
   </li>
 </ul> 
 </div>
-<div id=ecd>
-
-<select id=sn_tag style="width:5rem">
-<option value="">ins tag</option>
-</select>
-<select id=sn_comp>
-<option value="">ins compo</option>
-</select>
-<select id=sn_kw style="display:none;width:6rem">
-<option value="">ins word</option>
-</select>
-<select id=sn_code style="display:none;width:6rem">
-<option value="">ins code</option>
-</select>
-<br/>
-<button id=b_tab>TAB</button>
-<button id=b_kakko>()</button>
-<button id=b_bracke>[]</button>
-<button id=b_brace>{}</button>
-<button id=b_quot>""</button>
-<button id=b_equal>=</button>
-<button id=b_semic>;</button>
-<button id=b_comma>,</button>
-<button id=b_minus>-</button>
-<button id=b_sp>SP</button>
-<button id=b_bs>BS</button>
-<button id=b_ret>RET</button>
-<button id=b_left>⬅️</button>
-<button id=b_up>⬆️</button>
-<button id=b_down>⬇️</button>
-<button id=b_right>➡️</button>
-</div>
 <div id=msg><div id=msgc></div></div>
 </div>
 <div class=sep id=vsep></div>
@@ -679,7 +774,48 @@ label,button {
 <span class=oswitch><label><input type=checkbox id=pause><span class=sbtn></span></label></span>
 <div id=pui></div>
 </div>
+<div id=kb>
+	
+</div>
 <div id=footer></div>
+</div>
+</div>
+<div id=kb>
+<section id=bottom>
+<section id=bmenu><button id=b_kclose>⬇️</button></section>
+<section id=kbd>
+<div class=kouho></div>
+<div class=kbmain>
+<div>
+<button id=b_exc>!</button><button id=b_dqu>"</button><button id=b_num>#</button><button id=b_dol>$</button><button id=b_per>%</button><button id=b_amp>&</button><button id=b_quo>'</button><button id=b_kakko>()</button><button id=b_uds>_</button><button id=b_upa>^</button><button id=b_nyo>~</button><button id=b_bar>|</button><button id=b_bqu>`</button><button id=b_bsl>\</button><button id=b_eq>=</button>
+<button id=b_mi>-</button><button id=b_plu>+</button><button id=b_ast>*</button><button id=b_sla>/</button><button class=edit id=b_copy>COPY</button><br/>
+
+<button id=b_q>q</button><button id=b_w>w</button><button id=b_e>e</button><button id=b_r>r</button><button id=b_t>t</button><button id=b_y>y</button><button id=b_u>u</button><button id=b_i>i</button><button id=b_o>o</button><button id=b_p>p</button><button id=b_@>@</button><button id=b_brake>[]</button><button id=b_bs class=ctrl>⬅️</button><button id=b_tab class=ctrl>TB</button><button id=b_func>=></button>
+<button id=b_pl>,</button><button id=b_n7>7</button><button id=b_n8>8</button><button id=b_n9>9</button><button class=edit id=b_cut>CUT</button><br/>
+
+<button id=b_a>a</button><button id=b_s>s</button><button id=b_d>d</button><button id=b_f>f</button><button id=b_g>g</button><button id=b_h>h</button><button id=b_j>j</button><button id=b_k>k</button><button id=b_l>l</button><button id=b_sc>;</button><button id=b_co>:</button><button id=b_brace>{}</button><button id=b_ret class=ctrl>RE</button><button id=b_cu class=curs>⬆︎</button><button id=b_ne>!=</button>
+<button id=b_pl>.</button><button id=b_n4>4</button><button id=b_n5>5</button><button id=b_n6>6</button><button class=edit id=b_paste>PASTE</button><br/>
+
+<button id=b_shift class=ctrl>⬆️</button><button id=b_z>z</button><button id=b_x>x</button><button id=b_c>c</button><button id=b_v>v</button><button id=b_b>b</button><button id=b_n>n</button><button id=b_m>m</button><button id=b_lt><</button><button id=b_gt>></button><button id=b_que>?</button><button id=b_spc class=ctrl>SP</button><button id=b_cl class=curs>⬅︎</button><button id=b_cd class=curs>⬇︎</button><button id=b_cr class=curs>➡︎</button>
+<button id=b_n0>0</button><button id=b_n1>1</button><button id=b_n2>2</button><button id=b_n3>3</button><button class=edit id=b_undo>UNDO</button>
+</div>
+<div class=snip>
+<select id=sn_tag style="width:8rem">
+<option value="">ins tag</option>
+</select>
+<br/>
+<select id=sn_comp style="width:8rem">
+<option value="">ins compo</option>
+</select>
+<br/>
+<select id=sn_code style="width:8rem">
+<option value="">ins code</option>
+</select>
+</div>
+</div>
+</section>
+</section>
+
 </div>
 <div id=infow>
 <div id=infoc>❌</div>
@@ -690,7 +826,6 @@ more samples <a href="./sample/">here</a><br/>
 github <a href="https://github.com/wakufactory/afe">afe</a><br/>
 <br/>
 support : <a href="https://twitter.com/wakufactory">twitter</a><br/>
-
 </div>
 </body>
 
