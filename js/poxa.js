@@ -1,6 +1,7 @@
 POXA = {
 lskey:"afe.polygon.work",
-log:function(msg) {
+log:function(msg,stack) {
+	if(stack) msg = stack 
 	if(window.POXE) POXE.log(msg)
 	else console.log(msg)
 },
@@ -10,6 +11,38 @@ registerComponent:function(name,f) {
 	POXA.log("regist component "+name)
 },
 registerShader:function(name,f) {
+	const can = document.createElement("canvas") ;
+	const gl = can.getContext("webgl") ;
+	let vshader = gl.createShader(gl.VERTEX_SHADER);
+	const vss = `uniform mat4 modelMatrix;
+		uniform mat4 modelViewMatrix;
+		uniform mat4 projectionMatrix;
+		uniform mat4 viewMatrix;
+		uniform mat3 normalMatrix;
+		uniform vec3 cameraPosition;
+		uniform bool isOrthographic;
+		attribute vec3 position;
+		attribute vec3 normal;
+		attribute vec2 uv;
+ `
+	gl.shaderSource(vshader, vss+f.vertexShader);
+	gl.compileShader(vshader);
+	if(!gl.getShaderParameter(vshader, gl.COMPILE_STATUS)) {
+		const err = ("vs error:"+gl.getShaderInfoLog(vshader)); 
+		throw(err)
+	}	
+	const fss = `precision highp float;
+		uniform mat4 viewMatrix;
+		uniform vec3 cameraPosition;
+		uniform bool isOrthographic;
+`
+	let fshader = gl.createShader(gl.FRAGMENT_SHADER);
+	gl.shaderSource(fshader, fss+f.fragmentShader);
+	gl.compileShader(fshader);
+	if(!gl.getShaderParameter(fshader, gl.COMPILE_STATUS)) {
+		const err=("fs error:"+gl.getShaderInfoLog(fshader)); 
+		throw(err)
+	}	
 	if(AFRAME.shaders[name]) delete AFRAME.shaders[name]
 	AFRAME.registerShader(name,f) 
 	POXA.log("regist shader "+name)
@@ -41,11 +74,11 @@ loadscene:function(data,attr) {
 	let ev 
 	try {
 		let src = data.components
-		if(data.shaders) src += data.shaders 
+		if(data.shaders) src += "\n"+data.shaders 
 		ev = new Function("POXA",''+src+'')
 	} catch(err) {
 		console.log("catch eval")
-		POXA.log(err,err.stack)
+		POXA.log(err)
 		return 
 	}
 	let ret 
