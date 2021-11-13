@@ -6,7 +6,7 @@
 <title>afe : A-Frame Web Editor</title>
 <link rel="icon" type="image/png" href="ico_af.png">
 <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-<script src="js/poxa.js?20210709"></script>
+<script src="js/poxa.js?20211023"></script>
 <script src="js/ls.js"></script>
 <script src="js/WBind.js"></script>
 <script src="components/afecomponents.js?20211003"></script>
@@ -17,6 +17,7 @@ function $(o) {return document.getElementById(o)}
 onload=async function() {
 	POXE.editor()
 	POXA.init()
+	POXA.debug = true 
 	let data = await POXA.load()
 	if(data==null) data = await POXA.load("sample/template.json")
 	if(data) {
@@ -214,7 +215,7 @@ POXE.reload = ()=> {
 
 POXE.ace = ()=> {
 	ace.config.set('basePath', "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/") 
-	var fontsize = (document.body.offsetWidth<1200)?12:14 ;
+	var fontsize = 12 ;
 	var theme = "ace/theme/tomorrow_night" ;
 	var keybind = {
 	    name: 'save',
@@ -247,7 +248,7 @@ POXE.ace = ()=> {
 	POXE.e2 = setace("e2","ace/mode/html")
 	POXE.e3 = setace("e3","ace/mode/typescript")
 	POXE.e4 = setace("e4","ace/mode/glsl")
-	POXE.e5 = setace("e5","ace/mode/text")
+	POXE.e5 = setace("e5","ace/mode/markdown")
 }
 class editorkey {
 	constructor(base) {
@@ -395,7 +396,7 @@ a,a:visited {
 div.edit {
 	display:flex ;
 	flex-direction: column;
-	width:calc(50% - 5px) ;
+	width:calc(65% - 5px) ;
 	height:100% ;
 	background-color:#222 ;
 	z-index:2 ;
@@ -723,7 +724,7 @@ div.snip select {
 [AFE] scene:<span id=title></span>
 <div id=abtn>
 <button id=b_save >SAVE</button><span id=m_save></span>
-<button id=b_apply style="margin-left:2rem">APPLY</button>
+<button id=b_apply style="margin-left:2rem;font-size:1.2rem">APPLY</button>
 </div>
 </div>
 </div>
@@ -793,7 +794,7 @@ div.snip select {
 <button id=b_q>q</button><button id=b_w>w</button><button id=b_e>e</button><button id=b_r>r</button><button id=b_t>t</button><button id=b_y>y</button><button id=b_u>u</button><button id=b_i>i</button><button id=b_o>o</button><button id=b_p>p</button><button id=b_@>@</button><button id=b_brake>[]</button><button id=b_bs class=ctrl>⬅️</button><button id=b_tab class=ctrl>TB</button><button id=b_func>=></button>
 <button id=b_pl>,</button><button id=b_n7>7</button><button id=b_n8>8</button><button id=b_n9>9</button><button class=edit id=b_cut>CUT</button><br/>
 
-<button id=b_a>a</button><button id=b_s>s</button><button id=b_d>d</button><button id=b_f>f</button><button id=b_g>g</button><button id=b_h>h</button><button id=b_j>j</button><button id=b_k>k</button><button id=b_l>l</button><button id=b_sc>;</button><button id=b_co>:</button><button id=b_brace>{}</button><button id=b_ret class=ctrl>RE</button><button id=b_cu class=curs>⬆︎</button><button id=b_ne>!=</button>
+<button id=b_a>a</button><button id=b_s>s</button><button id=b_d>d</button><button id=b_f>f</button><button id=b_g>g</button><button id=b_h>h</button><button id=b_j>j</button><button id=b_k>k</button><button id=b_l>l</button><button id=b_sc>;</button><button id=b_co>:</button><button id=b_brace>{}</button><button id=b_ret class=ctrl>⏎</button><button id=b_cu class=curs>⬆︎</button><button id=b_ne>!=</button>
 <button id=b_pl>.</button><button id=b_n4>4</button><button id=b_n5>5</button><button id=b_n6>6</button><button class=edit id=b_paste>PASTE</button><br/>
 
 <button id=b_shift class=ctrl>⬆️</button><button id=b_z>z</button><button id=b_x>x</button><button id=b_c>c</button><button id=b_v>v</button><button id=b_b>b</button><button id=b_n>n</button><button id=b_m>m</button><button id=b_lt><</button><button id=b_gt>></button><button id=b_que>?</button><button id=b_spc class=ctrl>SP</button><button id=b_cl class=curs>⬅︎</button><button id=b_cd class=curs>⬇︎</button><button id=b_cr class=curs>➡︎</button>

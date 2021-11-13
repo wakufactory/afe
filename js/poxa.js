@@ -1,18 +1,22 @@
 POXA = {
+debug:false,
 lskey:"afe.polygon.work",
 log:function(msg,stack) {
 	if(stack) msg = stack 
 	if(window.POXE) POXE.log(msg)
 	else console.log(msg)
 },
+//wrapper 
 registerComponent:function(name,f) {
 	if(AFRAME.components[name]) delete AFRAME.components[name]
 	AFRAME.registerComponent(name,f)
 	POXA.log("regist component "+name)
 },
 registerShader:function(name,f) {
+	if(AFRAME.shaders[name]) delete AFRAME.shaders[name]
+	if(POXA.debug) {
 	const can = document.createElement("canvas") ;
-	const gl = can.getContext("webgl") ;
+	const gl = can.getContext("webgl2") ;
 	let vshader = gl.createShader(gl.VERTEX_SHADER);
 	const vss = `uniform mat4 modelMatrix;
 		uniform mat4 modelViewMatrix;
@@ -30,8 +34,10 @@ registerShader:function(name,f) {
 	if(!gl.getShaderParameter(vshader, gl.COMPILE_STATUS)) {
 		const err = ("vs error:"+gl.getShaderInfoLog(vshader)); 
 		throw(err)
+		return 
 	}	
-	const fss = `precision highp float;
+	const fss = `
+		precision highp float;
 		uniform mat4 viewMatrix;
 		uniform vec3 cameraPosition;
 		uniform bool isOrthographic;
@@ -42,8 +48,9 @@ registerShader:function(name,f) {
 	if(!gl.getShaderParameter(fshader, gl.COMPILE_STATUS)) {
 		const err=("fs error:"+gl.getShaderInfoLog(fshader)); 
 		throw(err)
-	}	
-	if(AFRAME.shaders[name]) delete AFRAME.shaders[name]
+		return
+	}
+	}
 	AFRAME.registerShader(name,f) 
 	POXA.log("regist shader "+name)
 },
@@ -226,6 +233,13 @@ POXA.setUIproperty = function(comp,prop,cb=null) {
 	if(!cname) cname="" 
 	console.log(cname)
 	if(!POXA.uprop) POXA.uprop = WBind.create()
+	let inputcb = true 
+	POXA.uprop.setValue = function(p,v) {
+		if(POXA.uprop.prop[p]==undefined) return 
+		inputcb = false 
+		POXA.uprop[p] = v 
+		inputcb = true 
+	}
 	let tag 
 	for(let i in prop) {
 		const p = prop[i] ;
@@ -307,7 +321,7 @@ POXA.setUIproperty = function(comp,prop,cb=null) {
 				_setdisp(i,POXA.uprop[i])
 //				this.keyElelment.focus()
 //				this.callEvent("prop",{key:i,value:v})
-				if(cb) cb({key:i,value:POXA.uprop[i]})
+				if(inputcb) if(cb) cb({key:i,value:POXA.uprop[i]})
 			}
 		})
 		POXA.uprop[i] = p.value ;

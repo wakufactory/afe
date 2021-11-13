@@ -66,11 +66,11 @@
 		"jyoyaku":["break","case ","catch()","class ","const ","continue","debugger","default","delete","do","else ","export","extends","for()","function ","if()","import ","in","instanceof ","new ","return ","super","switch()","this.","throw","try","typeof ","var ","void","while()","with","yield","implements","let ","package","static","await ","async ","null","true","false","undefined","finally","constructor()"],
 		"math":["Math.","Math.PI", "Math.floor()","Math.abs()","Math.sign()","Math.max()","Math.min()","Math.random()","Math.sin()","Math.cos()","Math.atan2()","Math.sqrt()","Math.pow()","Math.exp()","Math.log()","Math.hypot()"],
 		"word":[
-			"position","rotation","scale","color","time","components","data","material","uniform","texture","default"],
+			"position","rotation","scale","color","time","components","data","material","uniform","texture","default","quaternion","detail","pressed","touched"],
 		"prop":["AFRAME.","POXA.","THREE.",".objct3D",".value",".id","document."],
-		"method":[".setAttribute()",".addEventListener()",".getObject3D()",".emit()",".querySelector()",".querySelectorAll()",".appendChild()",".createElement()"],
+		"method":[".setAttribute()",".addEventListener()",".getObject3D()",".emit()",".querySelector()",".querySelectorAll()",".appendChild()",".createElement()","Vector2()","Vector3()","Quaternion()","invert()","clone()","copy()","multiply()"],
 		"tag":["<!-- -->","<a-entity>","<a-assets>","<img src=\"\" id=\"\" />","<a-box>","<a-plane>"],
-		"aprop":["position=\"\"","rotation=\"\"","scale=\"\"","color=\"\"","height=\"\"","radius=\"\"","width=\"\"","mixin=\"\"","transparent","segment-","true","false","flat","standard"],
-		"gyoyaku":["in ","out ","varying ","uniform ","vec2 ","vec3 ","vec4 ","float ","int ","gl_Positon","gl_FragColor","timestamp","discard","sin()","cos()","atan()","flact()","floor()","mod()","exp()","mix()","dot()","cross()","step()","smoothstep()","modelViewMatrix","projectionMatrix","viewMatrix","normalMatrix","cameraPosition","position","normal"]
+		"aprop":["id=\"\"","class=\"\"","geometry=\"\"","material=\"\"","animation=\"\"","position=\"\"","rotation=\"\"","scale=\"\"","color=\"\"","height=\"\"","radius=\"\"","width=\"\"","depth=\"\"","mixin=\"\"","transparent","segment-","true","false","flat","standard"],
+		"gyoyaku":["in ","out ","varying ","uniform ","vec2 ","vec3 ","vec4 ","mat3 ","mat4 ","bool ","sampler2D ","float ","int ","gl_Positon","gl_FragColor","timestamp","discard","sin()","cos()","atan()","flact()","floor()","mod()","exp()","mix()","dot()","cross()","normalize()","clamp()","step()","smoothstep()","texture2D()","modelViewMatrix","projectionMatrix","viewMatrix","normalMatrix","cameraPosition","position","normal"]
 	}
 }
