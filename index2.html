@@ -6,7 +6,7 @@
 <title>afe : A-Frame Web Editor</title>
 <link rel="icon" type="image/png" href="ico_af.png">
 <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-<script src="js/poxa.js?20211023"></script>
+<script src="js/poxa.js?20211114"></script>
 <script src="js/ls.js"></script>
 <script src="js/WBind.js"></script>
 <script src="components/afecomponents.js?20211003"></script>
@@ -715,6 +715,13 @@ button.curs {
 div.snip select {
 	margin-bottom:1rem ;
 }
+#enterVRButton {
+	position: absolute ;
+	left:calc(50% - 5rem) ;
+	top:90% ;
+	font-size:2rem ;
+	width:10rem ;
+}
 </style>
 <body>
 <div id=main>
@@ -776,7 +783,6 @@ div.snip select {
 <div id=pui></div>
 </div>
 <div id=kb>
-	
 </div>
 <div id=footer></div>
 </div>

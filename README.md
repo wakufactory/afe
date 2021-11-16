@@ -8,6 +8,7 @@ demo page : https://polygon.work/afet/
 ## files
 
  - index.html -- editor
+ - index2.html -- editor for Quest browser
  - view.html  -- viewer
  - sample  -- sample scenes
  

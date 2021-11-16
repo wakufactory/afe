@@ -67,15 +67,15 @@ registerGeometry:function(name,f) {
 initscene:function() {
 	const osc = document.querySelector("a-scene")
 	if(osc) $("scene").removeChild(osc)
-		const sc = document.createElement("a-scene")
-		sc.setAttribute('background','color',"#88f")
-		sc.setAttribute("embedded","true")
-		sc.setAttribute("fps",true)
-		sc.setAttribute("sceneinit","query:"+POXA.query?.join(","))	
-		$("scene").appendChild(sc)
-		POXA.scene = sc 
-		$('pui').innerHTML = ""
-		POXA.uprop = null 
+	const sc = document.createElement("a-scene")
+	sc.setAttribute('background','color',"#88f")
+	sc.setAttribute("embedded","true")
+	sc.setAttribute("fps",true)
+	sc.setAttribute("sceneinit","query:"+POXA.query?.join(","))	
+	$("scene").appendChild(sc)
+	POXA.scene = sc 
+	$('pui').innerHTML = ""
+	POXA.uprop = null 
 },
 loadscene:function(data,attr) {
 	let ev 
@@ -109,12 +109,18 @@ loadscene:function(data,attr) {
 			const osc = document.querySelector("a-scene")
 			if(osc) $("scene").removeChild(osc)
 			const sc = document.createElement("a-scene")
-			sc.setAttribute('background','color',"#88f")
+			sc.setAttribute('background','color',data.settings.background?data.settings.background:"#88f")
 			sc.setAttribute("embedded",true)
+			sc.setAttribute("vr-mode-ui","enterVRButton: #enterVRButton;")
 			sc.setAttribute("fps",true)
 			sc.setAttribute("sceneinit","query:"+POXA.query?.join(","))	
 			POXA.scene = sc 
+
 			$("scene").appendChild(sc )
+			const eb= document.createElement("button")
+			eb.id = "enterVRButton"
+			eb.innerHTML ="Enter VR"
+			$("scene").appendChild(eb)
 			$('pui').innerHTML = ""
 			POXA.uprop = null 		
 		}

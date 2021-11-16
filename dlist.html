@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>afe list</title>
+<link rel="icon" type="image/png" href="ico_af.png">
 <script>
 onload = function() {
 	var req = new XMLHttpRequest();
@@ -26,7 +27,13 @@ onload = function() {
 function list(l) {
 	var r = [] ;
 	for(var i = l.length-1 ; i>=0 ;i--) {
-		r.push(`<li><span class=n>${l[i]['name']}</span><span class=t>${l[i]['mtime']}</span> <a href="./?save/data/${l[i]['name']}" target="_blank">EDIT</a> <a href="./view.html?save/data/${l[i]['name']}" target="_blank">VIEW</a>
+		r.push(`<li>
+		<span class=n>${l[i]['name']}</span>
+		<span class=t>${l[i]['mtime']}</span> 
+		<a href="./?save/data/${l[i]['name']}" target="_blank">EDIT</a> 
+		<a href="./index2.html?save/data/${l[i]['name']}" target="_blank">EDIT2</a> 
+		<a href="./view.html?save/data/${l[i]['name']}" target="_blank">VIEW</a> 
+		<a href="./index_m.html?save/data/${l[i]['name']}" target="_blank">EDIT(m)</a>
 </li>`)
 	}
 	document.getElementById("list").innerHTML = r.join("\n") ;
