@@ -16,7 +16,10 @@
 function $(o) {return document.getElementById(o)}
 onload=async function() {
 	POXE.editor()
-	POXA.init()
+	POXA.init(()=>{
+		console.log("sceneloaded")
+		POXE.stree(AFRAME.scenes[0].childNodes)		
+	})
 	let data = await POXA.load()
 	if(data==null) data = await POXA.load("sample/template.json")
 	if(data) {
@@ -189,8 +192,11 @@ POXE.reload = ()=> {
 		shaders:POXE.e4.getValue(),
 		docs:POXE.e5.getValue()
 	}
-	POXA.loadscene(data)
+	POXA.loadscene(data,null,stat=>{
+
+	})
 	POXE.save(data) 
+
 }
 
 POXE.ace = ()=> {
@@ -231,6 +237,41 @@ POXE.ace = ()=> {
 	POXE.e5 = setace("e5","ace/mode/text")
 }
 
+POXE.stree = function(node) {
+	const nl = [] 
+	const d = []
+	function dumpscene(node,lv=0) {
+		for(let n of node) {
+			if(n.tagName?.substr(0,2)!="A-" && n.tagName!="IMG"&& n.tagName!="VIDEO") continue 
+			const ni = nl.length
+			nl.push(n)
+			let sp=""
+			for(let i=0;i<lv;i++) sp+="&nbsp;&nbsp;&nbsp;"
+			d.push(`<div data-idx=${ni}>${sp}<span class=name>${n.tagName} #${n.id}</span>`)
+			const cn = []
+			for(let a of n.attributes) {
+				const cp = AFRAME.components[a.name]?"*":""
+				d.push(sp+"<span class=atname>"+a.name+cp+"</span> "+
+					`<input type=text size=40 data-idx=${ni} data-name="${a.name}" value="${a.value}">`)
+			}
+			d.push("</div>")
+			if(n.childNodes) dumpscene(n.childNodes,lv+1)
+		}
+	}
+	dumpscene(node)
+	$('e21').innerHTML = d.join("<br/>")
+//	console.log(nl)
+	document.querySelectorAll("#e21 input").forEach(o=>{
+		o.addEventListener("change", ev=>{
+			const t = ev.target 
+			const idx = parseInt(t.getAttribute("data-idx"))
+//			console.log(t.getAttribute("data-idx")+"/"+t.getAttribute("data-name")+":"+t.value)
+			nl[idx].setAttribute(t.getAttribute("data-name"),t.value)
+			nl[idx].flushToDOM()
+//			console.log(nl[idx].outerHTML)
+		})
+	})
+}
 </script>
 <style>
 body,html {
@@ -359,23 +400,28 @@ a-entity {
 }
 #pui div.b{
 	display:flex ;
+	height:2.5rem ;
 }
-#pui input {
+#pui input,select {
 	font-size:0.8rem ;
+	height:2rem ;
 }
 #pui button {
 	font-size:0.8rem ;
+	height:2rem ;
 }
 #pui input[type=range] {
 	width:200px ;
 }
 #pui div.t {
+	line-height:2.2rem; 
 	width:6rem ;
 	padding-left:0.2rem ;
 	overflow:hidden ;
 }
 #pui div.v {
 	width:4rem ;
+	line-height:2.2rem; 
 	padding-left:0.5rem ;
 	overflow:hidden ;
 }
@@ -517,6 +563,22 @@ label,button {
 	font-size:2rem ;
 	width:10rem ;
 }
+#e21 {
+	color:white ;
+	margin-left:2rem ;
+}
+#e21 span.name {
+	background-color:#080 ;
+}
+#e21 span.atname {
+	display:inline-block ;
+	width:10rem ;
+	border-bottom:1px solid #444;
+}
+#e21 input {
+	background-color:#444 ;
+	color:#eee ;
+}
 </style>
 <body>
 <div class=edit id=editp>
@@ -547,6 +609,11 @@ label,button {
   	<input name="tab" id="tab2" type="radio"  checked/>
 	<label for="tab2">SCENE</label>
 	<div class="contents tab2" id=e2></div>
+  </li>
+   <li>
+  	<input name="tab" id="tab21" type="radio"/>
+	<label for="tab21">SCENE TREE</label>
+	<div class="contents tab21" style="overflow-y:scroll"><div id=e21></div></div>
   </li>
   <li>
   	<input name="tab" id="tab3" type="radio"  />

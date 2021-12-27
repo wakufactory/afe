@@ -77,7 +77,7 @@ initscene:function() {
 	$('pui').innerHTML = ""
 	POXA.uprop = null 
 },
-loadscene:function(data,attr) {
+loadscene:function(data,attr,cb=null) {
 	let ev 
 	try {
 		let src = data.components
@@ -86,6 +86,7 @@ loadscene:function(data,attr) {
 	} catch(err) {
 		console.log("catch eval")
 		POXA.log(err)
+		if(cb) cb({stat:-1})
 		return 
 	}
 	let ret 
@@ -94,6 +95,7 @@ loadscene:function(data,attr) {
 	} catch(err) {
 		console.log("catch eval")
 		POXA.log(err,err.stack)
+		if(cb) cb({stat:-1})
 		return 
 	}
 	if(ret !==undefined) {
@@ -114,6 +116,7 @@ loadscene:function(data,attr) {
 			sc.setAttribute("vr-mode-ui","enterVRButton: #enterVRButton;")
 			sc.setAttribute("fps",true)
 			sc.setAttribute("sceneinit","query:"+POXA.query?.join(","))	
+			sc.setAttribute("_sceneloaded",true)
 			POXA.scene = sc 
 
 			$("scene").appendChild(sc )
@@ -124,6 +127,10 @@ loadscene:function(data,attr) {
 			$('pui').innerHTML = ""
 			POXA.uprop = null 		
 		}
+		let bs = POXA.scene 
+		if(attr?.targetid) {
+			if($(attr.targetid)) bs = $(attr.targetid)
+		} 
 		const dc = document.createElement("a-entity")
 		for(let p in attr) dc.setAttribute(p,attr[p])
 		dc.innerHTML = data.scenes[0]
@@ -131,22 +138,25 @@ loadscene:function(data,attr) {
 			if(o.tagName=="A-ASSETS") {
 				POXA.scene.appendChild(o)
 			}
-			if(attr?.import && o.id=="camrig") {
+			if(attr?.import && (o.id=="camrig" || o.classList?.contains("noimport"))) {
 				dc.removeChild(o)
 			}
 		})
 		try {
-			POXA.scene.appendChild(dc)			
+			bs.appendChild(dc)			
 		}catch(err) {
 			console.log("catch append")
 			POXA.log(err,err.stack)
-			return 
+			if(cb) cb({stat:-1})
+			return null
 		}
 		POXA.log("scene set OK")
+		if(cb) cb({stat:1,ent:dc})
+		return dc
 	}
 }
 }
-POXA.init = function() {
+POXA.init = function(sceneloaded=null) {
 	$("c_stats")?.addEventListener("change", (ev)=>{
 		const osc = document.querySelector("a-scene")
 		if(ev.target.checked) osc.setAttribute("stats",true)
@@ -180,7 +190,12 @@ POXA.init = function() {
 				if($('fps')) $('fps').innerHTML = `${info.calls} CALLS/${info.triangles}△/${fps.toString().substr(0,4)}FPS`
 			}
 		}	
-	})	
+	})
+	POXA.registerComponent('_sceneloaded',{
+		init:function() {
+			if(sceneloaded) sceneloaded() 
+		}
+	})
 }
 
 POXA.load = async (path)=> {
@@ -213,7 +228,8 @@ POXA.importScene = async function(path,attr) {
 	console.log(data)
 	if(data!==null) {
 		POXA.loadscene(data,attr)
-	}
+		return true 
+	} return false 
 } 
 POXA.setimport = async function(list) {
 	const pl = []
